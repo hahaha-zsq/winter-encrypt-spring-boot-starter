@@ -1,0 +1,31 @@
+{
+  "groups": [
+    {
+      "name": "winter-crypto",
+      "type": "com.zsq.winter.encrypt.entity.CryptoProperties",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "winter-crypto.decrypt-key",
+      "type": "java.lang.String",
+      "description": "解密密钥",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
+      "name": "winter-crypto.encrypt-key",
+      "type": "java.lang.String",
+      "description": "加密密钥",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
+      "name": "winter-crypto.is-print",
+      "type": "java.lang.Boolean",
+      "description": "是否打印banner",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties",
+      "defaultValue": true
+    }
+  ],
+  "hints": []
+}
