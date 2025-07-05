@@ -161,7 +161,34 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--            当执行 Maven 构建到达 verify 阶段时，maven-gpg-plugin 会使用 GPG 密钥对项目工件（如 JAR 文件）进行数字签名。这是为了保证工件的完整性和可追溯性，特别是在发布到远程仓库之前-->
+            <!--      手动部署      当执行 Maven 构建到达 verify 阶段时，maven-gpg-plugin 会使用 GPG 密钥对项目工件（如 JAR 文件）进行数字签名。这是为了保证工件的完整性和可追溯性，特别是在发布到远程仓库之前-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                <version>1.6</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>sign-artifacts</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>sign</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <executable>gpg</executable>-->
+<!--                    <gpgArguments>-->
+<!--                        <arg>&#45;&#45;batch</arg>-->
+<!--                        <arg>&#45;&#45;pinentry-mode</arg>-->
+<!--                        <arg>loopback</arg>-->
+<!--                        <arg>-u</arg>-->
+<!--                        <arg>${gpg.keyname}</arg>-->
+<!--                        <arg>&#45;&#45;passphrase</arg>-->
+<!--                        <arg>${gpg.passphrase}</arg>-->
+<!--                    </gpgArguments>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            自动部署-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -173,21 +200,17 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <!-- Prevent `gpg` from using pinentry programs -->
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <executable>gpg</executable>
-                    <gpgArguments>
-                        <arg>--batch</arg>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                        <arg>-u</arg>
-                        <arg>${gpg.keyname}</arg>
-                        <arg>--passphrase</arg>
-                        <arg>${gpg.passphrase}</arg>
-                    </gpgArguments>
-                </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
