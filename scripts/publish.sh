@@ -17,9 +17,9 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-# 更新版本号
+# 只替换第一个<version>标签（即项目版本号）
 echo "更新pom.xml中的版本号为$VERSION..."
-sed -i '' "s/<version>.*<\/version>/<version>$VERSION<\/version>/" pom.xml
+sed -i '' "0,/<version>.*<\\/version>/s//<version>$VERSION<\\/version>/" pom.xml
 
 # 提交更改
 echo "提交更改..."
