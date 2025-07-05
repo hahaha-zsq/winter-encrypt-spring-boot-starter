@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.hahaha-zsq</groupId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <artifactId>winter-encrypt-spring-boot-starter</artifactId>
 
     <packaging>jar</packaging>
@@ -30,21 +30,21 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>0.0.2</version>
         </dependency>
 
         <!-- Spring Boot Configuration Processor -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>0.0.2</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <version>0.0.2</version>
         </dependency>
 
 
@@ -52,23 +52,23 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>0.0.2</version>
         </dependency>
 
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
-            <version>${hutool.version}</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-json</artifactId>
-            <version>${hutool.version}</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-crypto</artifactId>
-            <version>${hutool.version}</version>
+            <version>0.0.2</version>
         </dependency>
     </dependencies>
 
@@ -115,7 +115,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.4.0</version>
+                <version>0.0.2</version>
                 <extensions>true</extensions>
                 <configuration>
                     <!--需要是我们之前定义的server的id-->
@@ -131,7 +131,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>0.0.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -145,7 +145,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>0.0.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>0.0.2</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
