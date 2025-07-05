@@ -4,6 +4,8 @@ name: 发布到Maven中央仓库
 on:
   release:
     types: [released]
+  tags:
+    - 'v*'
 # 定义一个发行任务
 jobs:
   publish:
