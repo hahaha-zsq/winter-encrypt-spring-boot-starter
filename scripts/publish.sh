@@ -17,9 +17,14 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-# 只替换第一个<version>标签（即项目版本号）
+# 修改project标签下的版本号
 echo "更新pom.xml中的版本号为$VERSION..."
-sed -i '' "0,/<version>.*<\\/version>/s//<version>$VERSION<\\/version>/" pom.xml
+sed -i '' '
+    /<groupId>io.github.hahaha-zsq<\/groupId>/{
+        n
+        s/[[:space:]]*<version>.*<\/version>[[:space:]]*$/    <version>'"$VERSION"'<\/version>/
+    }
+' pom.xml
 
 # 提交更改
 echo "提交更改..."
