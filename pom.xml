@@ -107,84 +107,87 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <!-- 下面这个标签里的不能改 -->
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.1.0</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>jar-no-fork</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.2.0</version>
-                    <configuration>
-                        <show>private</show>
-                        <nohelp>true</nohelp>
-                        <charset>UTF-8</charset>
-                        <encoding>UTF-8</encoding>
-                        <docencoding>UTF-8</docencoding>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.6</version>
-                    <executions>
-                        <execution>
-                            <id>sign-artifacts</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>sign</goal>
-                            </goals>
-                            <configuration>
-                                <!-- Prevent `gpg` from using pinentry programs -->
-                                <gpgArguments>
-                                    <arg>--pinentry-mode</arg>
-                                    <arg>loopback</arg>
-                                </gpgArguments>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        <stagingProgressTimeoutMinutes>20</stagingProgressTimeoutMinutes>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
+            <!--    Maven插件发布    -->
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!--需要是我们之前定义的server的id，用来从server文件中获取仓库的用户名密码的配置-->
+                    <publishingServerId>dadandiaoming-maven</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                    <!--需不需要自动发布，false就需要自己手动发布-->
+                    <autoPublish>false</autoPublish>
+                </configuration>
+            </plugin>
+
+
+            <!--            maven-source-plugin 是一个用于生成项目源代码的 Maven 插件，插件还可以用来将源代码作为附件附加到主 JAR 文件中。这通常是在发布项目的时候使用的，方便用户查看类的源代码-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--            maven-javadoc-plugin 将会生成项目的 JavaDoc 文档，并将其打包成一个 JAR 文件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <locale>zh_CN</locale>
+                            <encoding>UTF-8</encoding>
+                            <charset>UTF-8</charset>
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--            当执行 Maven 构建到达 verify 阶段时，maven-gpg-plugin 会使用 GPG 密钥对项目工件（如 JAR 文件）进行数字签名。这是为了保证工件的完整性和可追溯性，特别是在发布到远程仓库之前-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>gpg</executable>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                        <arg>-u</arg>
+                        <arg>${gpg.keyname}</arg>
+                        <arg>--passphrase</arg>
+                        <arg>${gpg.passphrase}</arg>
+                    </gpgArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
 
 </project>
