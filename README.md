@@ -230,11 +230,11 @@ String publicKey = keyMap.get("publicKey");
 ### 其他常见问题
 
 - **Q: 启动报缺少密钥/iv？**
-  - A: 请检查 `application.yml` 配置项是否齐全。
+   - A: 请检查 `application.yml` 配置项是否齐全。
 - **Q: 如何自定义加密算法？**
-  - A: 实现 `CryptoService` 并注入Spring容器即可。
+   - A: 实现 `CryptoService` 并注入Spring容器即可。
 - **Q: 支持哪些加密模式/填充？**
-  - A: 支持 Hutool 的所有 `Mode` 和 `Padding` 枚举。
+   - A: 支持 Hutool 的所有 `Mode` 和 `Padding` 枚举。
 
 ---
 
