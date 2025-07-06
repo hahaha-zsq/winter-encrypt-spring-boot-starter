@@ -42,12 +42,11 @@ jobs:
           </settings>
           EOF
 
-      - name: Set GPG environment variables
-        run: |
-          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
-          echo "gpg.keyname=${{ secrets.GPG_KEY_ID }}" >> $GITHUB_ENV
-          echo "gpg.passphrase=${{ secrets.GPG_PASSPHRASE }}" >> $GITHUB_ENV
-
       - name: Build and Publish
         run: |
-          mvn clean deploy -Dgpg.keyname=${{ secrets.GPG_KEY_ID }} -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests
+          # 获取导入的 GPG 密钥 ID
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          echo "Using GPG key: $GPG_KEY_ID"
+          
+          # 使用获取到的 GPG 密钥 ID 进行构建和发布
+          mvn clean deploy -Dgpg.keyname=$GPG_KEY_ID -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests
