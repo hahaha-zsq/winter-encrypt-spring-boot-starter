@@ -48,7 +48,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -89,7 +88,8 @@
     </developers>
     <scm>
         <connection>scm:git:git://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter.git</connection>
-        <developerConnection>scm:git:ssh://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter.git</developerConnection>
+        <developerConnection>scm:git:ssh://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter.git
+        </developerConnection>
         <url>https://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter</url>
     </scm>
 
@@ -106,9 +106,86 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-
-
-
+    <!-- 只有当特定profile被激活时才会生效。在您的项目中，只有当release profile被激活时（通过-P release参数），其中的插件配置才会生效。 -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.4.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>dadandiaoming-maven</publishingServerId>
+                            <tokenAuth>true</tokenAuth>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <locale>zh_CN</locale>
+                                    <encoding>UTF-8</encoding>
+                                    <charset>UTF-8</charset>
+                                    <doclint>none</doclint>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>gpg</executable>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                                <arg>-u</arg>
+                                <arg>${gpg.keyname}</arg>
+                                <arg>--passphrase</arg>
+                                <arg>${gpg.passphrase}</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    <!-- 始终生效，无论使用什么profile，这些插件配置都会被应用到项目构建中。 -->
     <build>
         <plugins>
             <!--    Maven插件发布    -->
@@ -162,33 +239,6 @@
                 </executions>
             </plugin>
             <!--      手动部署      当执行 Maven 构建到达 verify 阶段时，maven-gpg-plugin 会使用 GPG 密钥对项目工件（如 JAR 文件）进行数字签名。这是为了保证工件的完整性和可追溯性，特别是在发布到远程仓库之前-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-gpg-plugin</artifactId>-->
-<!--                <version>1.6</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>sign-artifacts</id>-->
-<!--                        <phase>verify</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>sign</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <executable>gpg</executable>-->
-<!--                    <gpgArguments>-->
-<!--                        <arg>&#45;&#45;batch</arg>-->
-<!--                        <arg>&#45;&#45;pinentry-mode</arg>-->
-<!--                        <arg>loopback</arg>-->
-<!--                        <arg>-u</arg>-->
-<!--                        <arg>${gpg.keyname}</arg>-->
-<!--                        <arg>&#45;&#45;passphrase</arg>-->
-<!--                        <arg>${gpg.passphrase}</arg>-->
-<!--                    </gpgArguments>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            自动部署-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -200,17 +250,21 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                        <configuration>
-                            <!-- Prevent `gpg` from using pinentry programs -->
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <executable>gpg</executable>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                        <arg>-u</arg>
+                        <arg>${gpg.keyname}</arg>
+                        <arg>--passphrase</arg>
+                        <arg>${gpg.passphrase}</arg>
+                    </gpgArguments>
+                </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

@@ -43,4 +43,6 @@ else
 fi
 
 echo "发布流程已启动，请查看GitHub Actions运行状态。"
-echo "GitHub Actions将自动构建并发布到Maven中央仓库。" 
+echo "GitHub Actions将自动构建并发布到Maven中央仓库。"
+echo "发布后，可以在 https://central.sonatype.com/ 查看发布状态。"
+echo "通常需要几分钟到几小时不等，新版本才会在Maven中央仓库中可用。" 
