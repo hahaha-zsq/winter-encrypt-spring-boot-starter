@@ -120,7 +120,7 @@
                     <publishingServerId>dadandiaoming-maven</publishingServerId>
                     <tokenAuth>true</tokenAuth>
                     <!--需不需要自动发布，false就需要自己手动发布-->
-                    <autoPublish>false</autoPublish>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
 
