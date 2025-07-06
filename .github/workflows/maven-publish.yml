@@ -34,7 +34,7 @@ jobs:
           <settings>
             <servers>
               <server>
-                <id>ossrh</id>
+                <id>dadandiaoming-maven</id>
                 <username>${{ secrets.OSSRH_USERNAME }}</username>
                 <password>${{ secrets.OSSRH_PASSWORD }}</password>
               </server>
