@@ -1,4 +1,7 @@
 # ❄️ winter-encrypt-spring-boot-starter
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Java support](https://img.shields.io/badge/Java-1.8+-green.svg)](https://openjdk.java.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6+-blue.svg)](https://spring.io/projects/spring-boot)
 
 > 一个开箱即用的 Spring Boot 加解密工具包，内置常用对称/非对称加密算法，支持注解式加解密，助力数据安全！
 
