@@ -20,6 +20,12 @@
       "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
     },
     {
+      "name": "winter-crypto.iv",
+      "type": "java.lang.String",
+      "description": "偏移量",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
       "name": "winter-crypto.is-print",
       "type": "java.lang.Boolean",
       "description": "是否打印banner",

@@ -18,7 +18,7 @@ public class CryptoProperties {
     /**
     * 解密密钥
     */
-    private String DecryptKey;
+    private String decryptKey;
     /**
      * 偏移量
      */

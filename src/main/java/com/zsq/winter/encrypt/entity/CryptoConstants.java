@@ -11,10 +11,10 @@ public class CryptoConstants {
     /**
      * 开源地址 GitHub
      */
-    public static final String GITHUB_URL = "";
+    public static final String GITHUB_URL = "https://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter";
 
     /**
      * 开发文档地址
      */
-    public static final String DEV_DOC_URL = "";
+    public static final String DEV_DOC_URL = "https://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter";
 }

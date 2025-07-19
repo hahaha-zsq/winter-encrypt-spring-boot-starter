@@ -38,8 +38,15 @@ public class BannerCreator implements ApplicationRunner {
                 "  \\ \\  \\|\\__\\_\\  \\ \\  \\ \\  \\\\ \\  \\   \\ \\  \\ \\ \\  \\_|\\ \\ \\  \\\\  \\\\|____________|\\ \\  \\____\\ \\  \\\\  \\|   \\/  /  /   \\ \\  \\___|    \\ \\  \\ \\ \\  \\\\\\  \\ \n" +
                 "   \\ \\____________\\ \\__\\ \\__\\\\ \\__\\   \\ \\__\\ \\ \\_______\\ \\__\\\\ _\\               \\ \\_______\\ \\__\\\\ _\\ __/  / /      \\ \\__\\        \\ \\__\\ \\ \\_______\\\n" +
                 "    \\|____________|\\|__|\\|__| \\|__|    \\|__|  \\|_______|\\|__|\\|__|               \\|_______|\\|__|\\|__|\\___/ /        \\|__|         \\|__|  \\|_______|\n"
-                + "\r\n" + CryptoConstants.DEV_DOC_URL
-                + " (" + CryptoConstants.VERSION_NO + ")";
+                + "\r\n版本: " + CryptoConstants.VERSION_NO
+                + "\r\n开发文档: " + CryptoConstants.DEV_DOC_URL
+                + "\r\nGitHub: " + CryptoConstants.GITHUB_URL;
+                
+        // 如果Gitee地址不为空，则添加Gitee地址
+        if (CryptoConstants.GITEE_URL != null && !CryptoConstants.GITEE_URL.isEmpty()) {
+            str += "\r\nGitee: " + CryptoConstants.GITEE_URL;
+        }
+                
         // 根据cryptoProperties中的配置决定是否打印横幅
         if (!ObjectUtils.isEmpty(cryptoProperties.getIsPrint()) && cryptoProperties.getIsPrint()) {
             // 如果配置允许打印，则通过日志输出横幅
