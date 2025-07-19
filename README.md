@@ -566,6 +566,8 @@ export const encryptAes = (plainText: string, secretKey: string, iv?: string, mo
 ```
 需要注意的是，这个包对于`PKCS7Padding`和`PKCS5Padding`都是使用`CryptoJS.pad.Pkcs7`，下图是这个包的源码解释
 ![img_1.png](img_1.png)
+
+</details>
 ---
 
 ## 🔗 相关链接
@@ -574,7 +576,6 @@ export const encryptAes = (plainText: string, secretKey: string, iv?: string, mo
 - [📚 Hutool 文档](https://hutool.cn/docs/#/crypto/)
 - [🔧 Spring Boot 官方文档](https://spring.io/projects/spring-boot)
 - [📦 Maven 中央仓库](https://search.maven.org/artifact/io.github.hahaha-zsq/winter-encrypt-spring-boot-starter)
-- [🔐 加密算法介绍](https://en.wikipedia.org/wiki/Encryption)
 
 ---
 
