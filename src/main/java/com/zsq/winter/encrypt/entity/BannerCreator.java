@@ -1,35 +1,68 @@
 package com.zsq.winter.encrypt.entity;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.util.ObjectUtils;
 
 /**
- * banner创建
- * 是一个接口，常用于项目启动后，（也就是ApringApplication.run()执行结束），立马执行某些逻辑。可用于项目的准备工作，比如加载配置文件，加载执行流，定时任务等等
+ * Banner创建器
+ * 
+ * <p>实现{@link ApplicationRunner}接口，在Spring Boot应用启动完成后立即执行。
+ * 用于在控制台输出加密模块的ASCII艺术Banner，包含版本信息和相关链接。</p>
+ * 
+ * <p>功能特性：</p>
+ * <ul>
+ *   <li>在应用启动后自动执行</li>
+ *   <li>根据配置决定是否显示Banner</li>
+ *   <li>显示模块版本信息</li>
+ *   <li>显示开发文档和代码仓库链接</li>
+ * </ul>
+ * 
+ * <p>使用场景：</p>
+ * <ul>
+ *   <li>项目启动后的准备工作</li>
+ *   <li>加载配置文件</li>
+ *   <li>执行初始化逻辑</li>
+ *   <li>启动定时任务等</li>
+ * </ul>
  *
- * @author zero
- * @date 2024/05/15
+ * @author dadandiaoming
+ * @since 1.0.0
+ * @see ApplicationRunner
+ * @see CryptoProperties
  */
 @Slf4j
-// 实现ApplicationRunner接口，允许在Spring Boot应用启动后执行特定的操作
 public class BannerCreator implements ApplicationRunner {
-    // 注入CryptoProperties配置类，用于获取配置信息
+    
+    /**
+     * 加密配置属性
+     */
     private final CryptoProperties cryptoProperties;
 
-    // 构造器注入cryptoProperties
+    /**
+     * 构造函数
+     * 
+     * <p>通过依赖注入获取加密配置属性。</p>
+     *
+     * @param cryptoProperties 加密配置属性
+     */
     public BannerCreator(CryptoProperties cryptoProperties) {
         this.cryptoProperties = cryptoProperties;
     }
 
-    // 实现ApplicationRunner接口的run方法
+    /**
+     * 应用启动后执行的方法
+     * 
+     * <p>在Spring Boot应用启动完成后立即执行，用于输出加密模块的Banner信息。
+     * Banner包含ASCII艺术形式的模块名称、版本信息、开发文档链接和代码仓库链接。</p>
+     *
+     * @param args 应用启动参数
+     * @throws Exception 执行过程中可能抛出的异常
+     */
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // https://www.bootschool.net/ascii
-        // 定义一个字符串，包含ASCII艺术形式的横幅
-        // 这个横幅在程序启动时根据配置决定是否打印
+        // ASCII艺术Banner，来源：https://www.bootschool.net/ascii
         String str = "" +
                 " ___       __   ___  ________   _________  _______   ________                 ________  ________      ___    ___ ________  _________  ________     \n" +
                 "|\\  \\     |\\  \\|\\  \\|\\   ___  \\|\\___   ___\\\\  ___ \\ |\\   __  \\               |\\   ____\\|\\   __  \\    |\\  \\  /  /|\\   __  \\|\\___   ___\\\\   __  \\    \n" +
@@ -47,9 +80,8 @@ public class BannerCreator implements ApplicationRunner {
             str += "\r\nGitee: " + CryptoConstants.GITEE_URL;
         }
                 
-        // 根据cryptoProperties中的配置决定是否打印横幅
+        // 根据配置决定是否打印Banner
         if (!ObjectUtils.isEmpty(cryptoProperties.getIsPrint()) && cryptoProperties.getIsPrint()) {
-            // 如果配置允许打印，则通过日志输出横幅
             log.info(str);
         }
     }

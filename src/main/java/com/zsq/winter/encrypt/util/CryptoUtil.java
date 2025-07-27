@@ -12,19 +12,42 @@ import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.crypto.symmetric.AES;
 import cn.hutool.crypto.symmetric.DES;
 import cn.hutool.crypto.symmetric.SymmetricAlgorithm;
+import com.zsq.winter.encrypt.enums.CryptoType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 加密解密工具类
+ *
+ * <p>提供多种加密解密算法的工具方法，包括：</p>
+ * <ul>
+ *   <li>凯撒密码加密解密</li>
+ *   <li>AES加密解密</li>
+ *   <li>DES加密解密</li>
+ *   <li>MD5、SHA1等哈希算法</li>
+ *   <li>RSA非对称加密解密</li>
+ *   <li>数字签名</li>
+ * </ul>
+ *
+ * <p>该类基于Hutool工具库实现，提供了简单易用的加密解密接口。</p>
+ *
+ * @author dadandiaoming
+ * @since 1.0.0
+ */
 public class CryptoUtil {
+
     /**
-     * 凯撒密码 它是一种替换加密的技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文。
-     * 使用凯撒加密方式加密数据
+     * 使用凯撒密码加密数据
      *
-     * @param original :原文
-     * @param key      :位移
-     * @return :加密后的数据
+     * <p>凯撒密码是一种简单的替换加密算法，将明文中的每个字符按指定位移量进行偏移。</p>
+     *
+     * @param original 原文内容
+     * @param key      位移量，正数向后偏移，负数向前偏移
+     * @return 加密后的字符串
+     * @throws IllegalArgumentException 如果original为null
+     * @see #winterDecryptKaiser(String, int)
      */
     public static String winterEncryptKaiser(String original, int key) {
         // 将字符串转为字符数组
@@ -44,11 +67,15 @@ public class CryptoUtil {
     }
 
     /**
-     * 使用凯撒加密方式解密数据
+     * 使用凯撒密码解密数据
      *
-     * @param encryptedData :密文
-     * @param key           :位移
-     * @return : 源数据
+     * <p>将凯撒加密后的字符串还原为原文，位移量需与加密时一致。</p>
+     *
+     * @param encryptedData 密文内容
+     * @param key           位移量，需与加密时一致
+     * @return 解密后的原文
+     * @throws IllegalArgumentException 如果encryptedData为null
+     * @see #winterEncryptKaiser(String, int)
      */
     public static String winterDecryptKaiser(String encryptedData, int key) {
         // 将字符串转为字符数组
@@ -67,25 +94,27 @@ public class CryptoUtil {
         return sb.toString();
     }
 
-
     /**
-     * hutool工具随机生成密钥
+     * 随机生成AES密钥
      *
-     * @return {@link byte[]}
+     * <p>用于对称加密算法AES，返回16/24/32字节密钥。</p>
+     *
+     * @return AES密钥字节数组
      */
     public static byte[] winterGenerateKey() {
         return SecureUtil.generateKey(SymmetricAlgorithm.AES.getValue()).getEncoded();
     }
 
     /**
-     * AES : Advanced Encryption Standard, 高级加密标准 .在密码学中又称Rijndael加密法，
-     * 是美国联邦政府采用的一种区块加密标准。这个标准用来替代原先的DES，已经被多方分析且广为全世界所使用
-     * hutool工具aes加密十六进制
-     * 默认使用的是AES/ECB/PKCS5Padding模式。如果使用CryptoJS，请调整为：padding: CryptoJS.pad.Pkcs7
+     * 使用AES算法加密数据，返回16进制字符串
      *
-     * @param key     hutool工具随机生成的密钥
-     * @param content 内容
-     * @return {@link String}
+     * <p>默认模式为ECB/PKCS5Padding，适合一般用途。</p>
+     *
+     * @param key     AES密钥
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws IllegalArgumentException 如果参数为null
+     * @see #winterAesDecryptStr(byte[], String)
      */
     public static String winterAesEncryptHex(byte[] key, String content) {
         // 构建
@@ -95,14 +124,18 @@ public class CryptoUtil {
     }
 
     /**
-     * aes加密十六进制
+     * 使用指定模式和填充方式的AES算法加密数据
      *
-     * @param mode    模式
-     * @param padding 填充
-     * @param key     钥匙
-     * @param iv      偏移量
-     * @param content 内容
-     * @return 字符串
+     * <p>支持CBC、CFB、OFB、CTR等模式，适合前后端对接。</p>
+     *
+     * @param mode    加密模式
+     * @param padding 填充方式
+     * @param key     AES密钥
+     * @param iv      初始化向量
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws IllegalArgumentException 如果参数为null
+     * @see #winterAesDecryptStr(Mode, Padding, byte[], byte[], String)
      */
     public static String winterAesEncryptHex(Mode mode, Padding padding, byte[] key, byte[] iv, String content) {
         // 创建一个包含特定加密模式的列表
@@ -118,11 +151,16 @@ public class CryptoUtil {
     }
 
     /**
-     * hutool工具aes解密
+     * 使用AES算法解密16进制字符串
      *
-     * @param key        hutool工具随机生成的密钥
-     * @param encryptHex aes加密后的十六进制字符串
-     * @return {@link String}
+     * <p>与winterAesEncryptHex配套使用，解密为原文。</p>
+     *
+     * @param key        AES密钥
+     * @param encryptHex 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws IllegalArgumentException 如果参数为null
+     * @throws RuntimeException         如果解密失败
+     * @see #winterAesEncryptHex(byte[], String)
      */
     public static String winterAesDecryptStr(byte[] key, String encryptHex) {
         // 构建
@@ -131,16 +169,20 @@ public class CryptoUtil {
         return aes.decryptStr(encryptHex, CharsetUtil.CHARSET_UTF_8);
     }
 
-
     /**
-     * aes解密str
+     * 使用指定模式和填充方式的AES算法解密数据
      *
-     * @param mode    模式
-     * @param padding 填充
-     * @param key     钥匙
-     * @param iv      偏移量
-     * @param content 加密后的内容
-     * @return 字符串
+     * <p>与winterAesEncryptHex(Mode, Padding, ...)配套使用。</p>
+     *
+     * @param mode    解密模式
+     * @param padding 填充方式
+     * @param key     AES密钥
+     * @param iv      初始化向量
+     * @param content 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws IllegalArgumentException 如果参数为null
+     * @throws RuntimeException         如果解密失败
+     * @see #winterAesEncryptHex(Mode, Padding, byte[], byte[], String)
      */
     public static String winterAesDecryptStr(Mode mode, Padding padding, byte[] key, byte[] iv, String content) {
         // 构建
@@ -153,14 +195,15 @@ public class CryptoUtil {
     }
 
     /**
-     * DES : Data Encryption Standard，即数据加密标准，是一种使用密钥加密的块算法，
-     * 1977年被美国联邦政府的国家标准局确定为联邦资料处理标准（FIPS），并授权在非密级政府通信中使用，随后该算法在国际上广泛流传开来。
-     * hutool工具des加密十六进制
-     * 默认实现为：DES/CBC/PKCS5Padding 如果使用CryptoJS，请调整为：padding: CryptoJS.pad.Pkcs7
+     * 使用DES算法加密数据，返回16进制字符串
      *
-     * @param key     hutool工具随机生成的密钥
-     * @param content 内容
-     * @return {@link String}
+     * <p>默认模式为CBC/PKCS5Padding，适合一般用途。</p>
+     *
+     * @param key     DES密钥
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws IllegalArgumentException 如果参数为null
+     * @see #winterDesDecryptStr(byte[], String)
      */
     public static String winterDesEncryptHex(byte[] key, String content) {
         // 构建
@@ -170,14 +213,18 @@ public class CryptoUtil {
     }
 
     /**
-     * winter des加密十六进制
+     * 使用指定模式和填充方式的DES算法加密数据
      *
-     * @param mode    模式
-     * @param padding 填充
-     * @param key     钥匙
-     * @param iv      偏移
-     * @param content 内容
-     * @return 字符串
+     * <p>支持CBC、CFB、OFB、CTR等模式，适合前后端对接。</p>
+     *
+     * @param mode    加密模式
+     * @param padding 填充方式
+     * @param key     DES密钥
+     * @param iv      初始化向量
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws IllegalArgumentException 如果参数为null
+     * @see #winterDesDecryptStr(Mode, Padding, byte[], byte[], String)
      */
     public static String winterDesEncryptHex(Mode mode, Padding padding, byte[] key, byte[] iv, String content) {
         // 加密为16进制表示
@@ -192,11 +239,16 @@ public class CryptoUtil {
     }
 
     /**
-     * hutool工具des解密
+     * 使用DES算法解密16进制字符串
      *
-     * @param key        hutool工具随机生成的密钥
-     * @param encryptHex des加密后的十六进制字符串
-     * @return {@link String}
+     * <p>与winterDesEncryptHex配套使用，解密为原文。</p>
+     *
+     * @param key        DES密钥
+     * @param encryptHex 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws IllegalArgumentException 如果参数为null
+     * @throws RuntimeException         如果解密失败
+     * @see #winterDesEncryptHex(byte[], String)
      */
     public static String winterDesDecryptStr(byte[] key, String encryptHex) {
         // 构建DES实例，使用给定的密钥
@@ -206,17 +258,21 @@ public class CryptoUtil {
     }
 
     /**
-     * 使用指定模式和填充方式的DES算法进行字符串解密
+     * 使用指定模式和填充方式的DES算法解密数据
      *
-     * @param mode 操作模式，如CBC、CFB等
-     * @param padding 填充方式，如PKCS5Padding、NoPadding等
-     * @param key 密钥，用于解密操作
-     * @param iv 初始化向量，某些模式下需要
-     * @param content 待解密的字符串
-     * @return 解密后的字符串
+     * <p>与winterDesEncryptHex(Mode, Padding, ...)配套使用。</p>
      *
-     * 注意：当使用CBC、CFB、OFB或CTR模式时，需要提供初始化向量（iv）
-     * 其他模式则不需要初始化向量
+     * <p><strong>注意：</strong>当使用CBC、CFB、OFB或CTR模式时，需要提供初始化向量（iv）</p>
+     *
+     * @param mode    解密模式
+     * @param padding 填充方式
+     * @param key     DES密钥
+     * @param iv      初始化向量
+     * @param content 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws IllegalArgumentException 如果参数为null
+     * @throws RuntimeException         如果解密失败
+     * @see #winterDesEncryptHex(Mode, Padding, byte[], byte[], String)
      */
     public static String winterDesDecryptStr(Mode mode, Padding padding, byte[] key, byte[] iv, String content) {
         // 加密为16进制表示
@@ -231,48 +287,36 @@ public class CryptoUtil {
         }
     }
 
-
     /**
-     * 消息摘要（Message Digest）又称为数字摘要(Digital Digest)
-     * 它是一个唯一对应一个消息或文本的固定长度的值，它由一个单向Hash加密函数对消息进行作用而产生
-     * 输入长度不定，输出长度一定。单向不可逆
-     * 使用数字摘要生成的值是不可以篡改的，为了保证文件或者值的安全
-     * MD2
-     * MD5
-     * SHA-1
-     * SHA-256
-     * SHA-384
-     * SHA-512
-     * hutool md5 hex16
+     * 生成16位MD5哈希值
      *
-     * @param content 需要被加密的内容
-     * @return {@link String}
+     * <p>常用于文件校验、密码存储（需加盐）、数字签名等。</p>
+     *
+     * @param content 原文内容
+     * @return 16位MD5哈希值
      */
     public static String winterMd5Hex16(String content) {
         return DigestUtil.md5Hex16(content);
     }
 
     /**
-     * hutool sha1十六进制
+     * 生成SHA1哈希值
      *
-     * @param content 内容
-     * @return {@link String}
+     * <p>常用于数据完整性校验，比MD5更安全。</p>
+     *
+     * @param content 原文内容
+     * @return SHA1哈希值
      */
     public static String winterSha1Hex(String content) {
         return DigestUtil.sha1Hex(content);
     }
 
     /**
-     * 使用Hutool工具生成RSA私钥和公钥。
-     * 非对称加密涉及公钥和私钥两个概念：
-     * - 私钥：由所有者持有，不能公开。用于签名时的加密操作。
-     * - 公钥：可以公开。用于签名验证或加密操作。
+     * 生成RSA公私钥对
      *
-     * 应用场景：
-     * - 签名：使用私钥加密，公钥解密。确保内容的完整性和发送者的身份验证。
-     * - 加密：使用公钥加密，私钥解密。确保只有私钥持有者能解密信息。
+     * <p>适用于非对称加密、数字签名等场景。</p>
      *
-     * @return 包含私钥和公钥的Map对象，键为"privateKey"和"publicKey"，值为对应的Base64编码字符串。
+     * @return Map，包含privateKey和publicKey
      */
     public static Map<String, String> winterGenerateRsAKey() {
         // 创建RSA对象并生成密钥对
@@ -291,13 +335,14 @@ public class CryptoUtil {
         return map;
     }
     /**
-     * 使用Hutool库进行RSA加密：用公钥加密，私钥解密。该方法用于向公钥所有者发布信息，
-     * 确保信息在传输过程中不会被他人篡改或获取。
+     * 使用RSA公钥加密数据
      *
-     * @param privateKey 私钥字符串，用于后续解密操作。请注意，私钥不应泄露给未经授权的第三方。
-     * @param publicKey  公钥字符串，用于加密内容。公钥可以安全地分发给需要发送加密信息的各方。
-     * @param content    需要加密的内容，即明文数据。
-     * @return 加密后的内容，以字节数组形式返回。调用方需要将此字节数组转换为适合传输的格式（如Base64编码）。
+     * <p>公钥加密，私钥解密，适合数据传输安全。</p>
+     *
+     * @param privateKey 私钥
+     * @param publicKey  公钥
+     * @param content    明文内容
+     * @return 加密后的字节数组
      */
     public static byte[] winterRsAPublicKeyEncrypt(String privateKey, String publicKey, String content) {
         // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类会根据提供的密钥字符串完成初始化。
@@ -307,86 +352,110 @@ public class CryptoUtil {
         return rsa.encrypt(content.getBytes(), KeyType.PublicKey);
     }
 
-
     /**
-     * 使用私钥对内容进行加密的函数。本函数的目的是让所有拥有公钥的接收者能够确认信息确实来自于私钥的持有者，
-     * 并且在传输过程中信息没有被篡改。需要注意的是，这种方式并不保证信息的保密性，因为公钥是公开的，任何人都可以解密信息。
+     * 使用RSA私钥加密数据
      *
-     * @param privateKey 私钥字符串，用于加密内容。
-     * @param publicKey  公钥字符串，虽然在本函数中公钥不直接用于加密过程，但它对于验证加密信息的来源和完整性是必需的。
-     * @param content    需要加密的内容。
-     * @return 加密后的字节数组。
+     * <p>私钥加密，公钥解密，适合数字签名。</p>
+     *
+     * @param privateKey 私钥
+     * @param publicKey  公钥
+     * @param content    明文内容
+     * @return 加密后的字节数组
      */
     public static byte[] winterRsAPrivateKeyEncrypt(String privateKey, String publicKey, String content) {
-        // 创建RSA加密器实例，加载私钥和公钥。
+        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类会根据提供的密钥字符串完成初始化。
         RSA rsa = new RSA(privateKey, publicKey);
-        // 使用私钥对内容进行加密，并返回加密后的字节数组。
+
+        // 使用公钥对内容进行加密，并返回加密后的字节数组。加密过程确保只有持有对应私钥的接收方才能解密。
         return rsa.encrypt(content.getBytes(), KeyType.PrivateKey);
     }
 
-    /**
-     * 使用私钥解密公钥加密的数据。
-     * 该方法适用于 scenarios，其中信息需要被公钥所有者解密，确保了信息的 confidentiality 和 integrity。
-     * 通过使用私钥解密，该方法 ensures 仅拥有对应公钥的 receiver 可以 decrypt 信息，从而 protecting 信息 from being intercepted 和 read by unauthorized parties。
-     *
-     * @param privateKey 私钥，用于解密数据。
-     * @param publicKey  公钥，对应于私钥，用于验证解密操作的合法性。
-     * @param encrypted  使用公钥加密后的数据，以字节数组形式提供。
-     * @return 解密后的字符串信息。
-     */
-    public static String winterRsAPrivateKeyDecrypt(String privateKey, String publicKey, byte[] encrypted) {
-        // 初始化RSA加密器，同时加载私钥和公钥。
+
+    public static String winterRsAPublicKeyEncryptHex(String privateKey, String publicKey, String content) {
+        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类会根据提供的密钥字符串完成初始化。
         RSA rsa = new RSA(privateKey, publicKey);
 
-        // 使用私钥对加密数据进行解密操作。
-        byte[] decrypted = rsa.decrypt(encrypted, KeyType.PrivateKey);
+        // 使用公钥对内容进行加密，并返回加密后的字节数组。加密过程确保只有持有对应私钥的接收方才能解密。
+        return rsa.encryptHex(content.getBytes(), KeyType.PublicKey);
+    }
 
-        // 将解密后的字节数组转换为字符串并返回。
-        return new String(decrypted);
+    public static String winterRsAPrivateKeyEncryptHex(String privateKey, String publicKey, String content) {
+        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类会根据提供的密钥字符串完成初始化。
+        RSA rsa = new RSA(privateKey, publicKey);
+
+        // 使用公钥对内容进行加密，并返回加密后的字节数组。加密过程确保只有持有对应私钥的接收方才能解密。
+        return rsa.encryptHex(content.getBytes(), KeyType.PrivateKey);
     }
 
 
+
     /**
-     * 使用私钥加密，公钥解密的方法。该方法的主要用途是让所有公钥的持有者能够验证私钥持有者的身份，
-     * 并且用来防止私钥持有者发布的内容被篡改。然而，这种方法并不用于保证内容不会被其他人获取。
+     * 使用RSA私钥解密公钥加密的数据
      *
-     * @param privateKey 私钥字符串，用于加密数据。
-     * @param publicKey  公钥字符串，用于解密数据。
-     * @param encrypted  使用RSA公钥加密后的字节数组，即密文。
-     * @return 解密后的字符串，即原始信息。
-     */
-    public static String winterRsAPublicKeyDecrypt(String privateKey, String publicKey, byte[] encrypted) {
-        // 创建RSA加密器实例，加载私钥和公钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-        // 使用公钥解密数据，得到解密后的字节数组。
-        byte[] decrypted = rsa.decrypt(encrypted, KeyType.PublicKey);
-        // 将解密后的字节数组转换为字符串并返回。
-        return new String(decrypted);
-    }
-
-
-    /**
-     * hutool 数字签名：数字签名是非对称密钥加密技术与数字摘要技术的应用。
+     * <p>适合公钥加密、私钥解密的场景。</p>
      *
      * @param privateKey 私钥
      * @param publicKey  公钥
-     * @param content    加密内容
+     * @param encrypted  加密内容
+     * @return 解密后的字节数组
+     */
+    public static byte[] winterRsAPrivateKeyDecrypt(String privateKey, String publicKey, String encrypted) {
+        // 初始化RSA加密器，同时加载私钥和公钥。
+        RSA rsa = new RSA(privateKey, publicKey);
+        // 使用私钥对加密数据进行解密操作。
+        return rsa.decrypt(encrypted, KeyType.PrivateKey);
+    }
+
+
+    public static byte[] winterRsAPublicKeyDecrypt(String privateKey, String publicKey, String encrypted) {
+        // 初始化RSA加密器，同时加载私钥和公钥。
+        RSA rsa = new RSA(privateKey, publicKey);
+        // 使用私钥对加密数据进行解密操作。
+        return rsa.decrypt(encrypted, KeyType.PublicKey);
+    }
+
+
+    public static String winterRsAPrivateKeyDecryptHex(String privateKey, String publicKey, String encrypted) {
+        // 初始化RSA加密器，同时加载私钥和公钥。
+        RSA rsa = new RSA(privateKey, publicKey);
+        // 使用私钥对加密数据进行解密操作。
+        return rsa.decryptStr(encrypted, KeyType.PrivateKey);
+    }
+
+
+    public static String winterRsAPublicKeyDecryptHex(String privateKey, String publicKey, String encrypted) {
+        // 初始化RSA加密器，同时加载私钥和公钥。
+        RSA rsa = new RSA(privateKey, publicKey);
+        // 使用私钥对加密数据进行解密操作。
+        return rsa.decryptStr(encrypted, KeyType.PublicKey);
+    }
+
+
+    /**
+     * 使用MD5withRSA算法进行数字签名
+     *
+     * <p>常用于身份认证、数据完整性校验。</p>
+     *
+     * @param privateKey 私钥
+     * @param publicKey  公钥
+     * @param content    原文内容
+     * @return 数字签名字节数组
      */
     public static byte[] winterMd5withRsaSign(String privateKey, String publicKey, String content) {
         // 使用自定义的私钥、公钥进行签名
-        byte[] signData = SecureUtil.sign(SignAlgorithm.MD5withRSA, privateKey, publicKey).sign(content.getBytes());
-        // 打印签名值
-        // System.out.println("签名值: " + HexUtil.encodeHexStr(signData));
-        return signData;
+        return SecureUtil.sign(SignAlgorithm.MD5withRSA, privateKey, publicKey).sign(content.getBytes());
     }
 
     /**
-     * hutool 数字签名：数字签名是非对称密钥加密技术与数字摘要技术的应用。
+     * 验证MD5withRSA数字签名
+     *
+     * <p>常用于身份认证、数据完整性校验。</p>
      *
      * @param privateKey 私钥
      * @param publicKey  公钥
-     * @param signData   数字签名加密后的字节数组
-     * @param content    需要被加密的内容
+     * @param signData   签名数据
+     * @param content    原文内容
+     * @return 验证通过返回true，否则false
      */
     public static boolean winterMd5withRsaVerify(String privateKey, String publicKey, byte[] signData, String content) {
         return SecureUtil.sign(SignAlgorithm.MD5withRSA, privateKey, publicKey).verify(content.getBytes(), signData);

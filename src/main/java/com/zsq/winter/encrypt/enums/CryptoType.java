@@ -6,5 +6,6 @@ package com.zsq.winter.encrypt.enums;
  */
 public enum CryptoType {
     DES,
-    AES
+    AES,
+    RSA
 }

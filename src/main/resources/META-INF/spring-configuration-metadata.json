@@ -4,33 +4,80 @@
       "name": "winter-crypto",
       "type": "com.zsq.winter.encrypt.entity.CryptoProperties",
       "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
+      "name": "winter-crypto.aes",
+      "type": "com.zsq.winter.encrypt.entity.CryptoProperties$AesConfig",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
+      "name": "winter-crypto.des",
+      "type": "com.zsq.winter.encrypt.entity.CryptoProperties$DesConfig",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
+    },
+    {
+      "name": "winter-crypto.rsa",
+      "type": "com.zsq.winter.encrypt.entity.CryptoProperties$RsaConfig",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
     }
   ],
   "properties": [
-    {
-      "name": "winter-crypto.decrypt-key",
-      "type": "java.lang.String",
-      "description": "解密密钥",
-      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
-    },
-    {
-      "name": "winter-crypto.encrypt-key",
-      "type": "java.lang.String",
-      "description": "加密密钥",
-      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
-    },
-    {
-      "name": "winter-crypto.iv",
-      "type": "java.lang.String",
-      "description": "偏移量",
-      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties"
-    },
     {
       "name": "winter-crypto.is-print",
       "type": "java.lang.Boolean",
       "description": "是否打印banner",
       "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties",
       "defaultValue": true
+    },
+    {
+      "name": "winter-crypto.aes.key",
+      "type": "java.lang.String",
+      "description": "AES密钥，支持16/24/32字节",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$AesConfig"
+    },
+    {
+      "name": "winter-crypto.aes.iv",
+      "type": "java.lang.String",
+      "description": "AES初始化向量，16字节",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$AesConfig"
+    },
+    {
+      "name": "winter-crypto.aes.auto-adjust-iv",
+      "type": "java.lang.Boolean",
+      "description": "AES是否自动调整IV长度",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$AesConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "winter-crypto.des.key",
+      "type": "java.lang.String",
+      "description": "DES密钥，8字节",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$DesConfig"
+    },
+    {
+      "name": "winter-crypto.des.iv",
+      "type": "java.lang.String",
+      "description": "DES初始化向量，8字节",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$DesConfig"
+    },
+    {
+      "name": "winter-crypto.des.auto-adjust-iv",
+      "type": "java.lang.Boolean",
+      "description": "DES是否自动调整IV长度",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$DesConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "winter-crypto.rsa.private-key",
+      "type": "java.lang.String",
+      "description": "RSA私钥，PEM格式",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$RsaConfig"
+    },
+    {
+      "name": "winter-crypto.rsa.public-key",
+      "type": "java.lang.String",
+      "description": "RSA公钥，PEM格式",
+      "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$RsaConfig"
     }
   ],
   "hints": []
