@@ -70,13 +70,13 @@
     {
       "name": "winter-crypto.rsa.private-key",
       "type": "java.lang.String",
-      "description": "RSA私钥，PEM格式",
+      "description": "RSA私钥，仅支持Base64字符串（PKCS#8，无PEM头尾），建议用CryptoUtil.winterGenerateRsAKey()生成",
       "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$RsaConfig"
     },
     {
       "name": "winter-crypto.rsa.public-key",
       "type": "java.lang.String",
-      "description": "RSA公钥，PEM格式",
+      "description": "RSA公钥，仅支持Base64字符串（X.509，无PEM头尾），建议用CryptoUtil.winterGenerateRsAKey()生成",
       "sourceType": "com.zsq.winter.encrypt.entity.CryptoProperties$RsaConfig"
     }
   ],

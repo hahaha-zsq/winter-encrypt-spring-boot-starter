@@ -1,9 +1,7 @@
 package com.zsq.winter.encrypt.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.crypto.Mode;
 import cn.hutool.crypto.Padding;
-import com.zsq.winter.encrypt.entity.CryptoProperties;
 import com.zsq.winter.encrypt.enums.CryptoType;
 import com.zsq.winter.encrypt.exception.CryptoException;
 import com.zsq.winter.encrypt.service.CryptoService;
@@ -39,7 +37,7 @@ import java.util.Objects;
  * <ul>
  *   <li><strong>AES</strong>：密钥长度128位(16字节)、192位(24字节)、256位(32字节)，IV长度128位(16字节)</li>
  *   <li><strong>DES</strong>：密钥长度64位(8字节)，IV长度64位(8字节)</li>
- *   <li><strong>RSA</strong>：密钥长度1024位、2048位、4096位等，不需要IV</li>
+ *   <li><strong>RSA</strong>：仅支持Base64格式密钥，不需要IV</li>
  * </ul>
  *
  * @author dadandiaoming
@@ -122,43 +120,56 @@ public class CryptoDefaultServiceImpl implements CryptoService {
      * RSA加密数据的方法
      *
      * @param content    待加密的内容，即原始数据
-     * @param privateKey RSA私钥，用于加密数据
-     * @param publicKey  RSA公钥，用于验证
-     * @return 返回加密后的数据，通常为Base64编码的字符串
+     * @param privateKey RSA私钥（不再使用）
+     * @param publicKey  RSA公钥（Base64字符串）
+     * @return 返回加密后的Base64字符串
      * @throws CryptoException 如果参数为null或密钥格式不正确
      */
     @Override
     public String encryptRsa(String content, String privateKey, String publicKey) {
-        // 内容校验
         if (content == null) {
             throw CryptoException.emptyData("RSA加密", null);
         }
-        // 校验RSA密钥格式
-        CryptoValidator.validateRsaKeyFormat(privateKey, publicKey);
-
-        // 使用RSA算法进行加密（私钥加密）
-        return CryptoUtil.winterRsAPrivateKeyEncryptHex(privateKey, publicKey, content);
+        if (publicKey == null || publicKey.trim().isEmpty()) {
+            throw CryptoException.generalError("RSA公钥不能为空", null, "RSA加密", publicKey);
+        }
+        // 只用公钥加密
+        return CryptoUtil.rsaEncryptToBase64(content, publicKey);
     }
 
     /**
      * RSA解密数据的方法
      *
-     * @param content    待解密的内容，即加密后的数据
-     * @param publicKey  RSA公钥，用于解密数据
-     * @param privateKey RSA私钥，用于验证
-     * @return 返回解密后的数据，即原始信息的字符串表示
+     * @param content    待解密的内容（Base64密文）
+     * @param publicKey  RSA公钥（不再使用）
+     * @param privateKey RSA私钥（Base64字符串）
+     * @return 返回解密后的明文
      * @throws CryptoException 如果参数为null或密钥格式不正确
      */
     @Override
     public String decryptRsa(String content, String publicKey, String privateKey) {
-        // 内容校验
         if (content == null || content.trim().isEmpty()) {
             throw CryptoException.emptyData("RSA解密", content);
         }
-        // 校验RSA密钥格式
-        CryptoValidator.validateRsaKeyFormat(privateKey, publicKey);
-        // 使用RSA算法进行解密（私钥解密）
-        return CryptoUtil.winterRsAPublicKeyDecryptHex(publicKey, privateKey, content);
+        if (privateKey == null || privateKey.trim().isEmpty()) {
+            throw CryptoException.generalError("RSA私钥不能为空", null, "RSA解密", privateKey);
+        }
+        // 只用私钥解密
+        return CryptoUtil.rsaDecryptFromBase64(content, privateKey);
+    }
+
+    /**
+     * 获取实际的RSA密钥，兼容旧版配置
+     * 
+     * @param key 密钥内容
+     * @param keyType 密钥类型（用于错误提示）
+     * @return 实际密钥内容
+     */
+    private String getActualRsaKey(String key, String keyType) {
+        if (key == null || key.trim().isEmpty()) {
+            throw CryptoException.generalError("RSA " + keyType + " 不能为空", null, "RSA加密解密", key);
+        }
+        return key;
     }
 
     /**

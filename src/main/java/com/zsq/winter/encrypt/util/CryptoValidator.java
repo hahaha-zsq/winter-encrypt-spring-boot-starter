@@ -1,18 +1,19 @@
 package com.zsq.winter.encrypt.util;
 
+import cn.hutool.crypto.asymmetric.RSA;
 import com.zsq.winter.encrypt.enums.CryptoType;
 import com.zsq.winter.encrypt.exception.CryptoException;
 
 /**
- * 加密参数验证工具类
- * 
+ * 加密算法参数验证器
+ *
  * <p>用于验证不同加密算法的密钥和初始化向量长度是否符合要求。</p>
  * 
  * <p>支持的算法及要求：</p>
  * <ul>
  *   <li><strong>AES</strong>：密钥长度128位(16字节)、192位(24字节)、256位(32字节)，IV长度128位(16字节)</li>
  *   <li><strong>DES</strong>：密钥长度64位(8字节)，IV长度64位(8字节)</li>
- *   <li><strong>RSA</strong>：密钥长度1024位、2048位、4096位等（PEM格式），不需要IV</li>
+ *   <li><strong>RSA</strong>：仅支持Base64格式密钥，不检查密钥长度，不需要IV</li>
  * </ul>
  * 
  * @author dadandiaoming
@@ -28,72 +29,64 @@ public class CryptoValidator {
     public static final int[] AES_KEY_LENGTHS = {16, 24, 32};
     
     /**
-     * DES算法要求的密钥长度（字节）
-     */
-    public static final int DES_KEY_LENGTH = 8;
-
-    // ==================== IV相关常量 ====================
-    
-    /**
      * AES算法要求的IV长度（字节）
      */
     public static final int AES_IV_LENGTH = 16;
+    
+    /**
+     * DES算法要求的密钥长度（字节）
+     */
+    public static final int DES_KEY_LENGTH = 8;
     
     /**
      * DES算法要求的IV长度（字节）
      */
     public static final int DES_IV_LENGTH = 8;
 
-    // ==================== 密钥验证方法 ====================
-
-    /**
-     * 验证密钥长度是否符合算法要求
-     *
-     * @param key 密钥
-     * @param cryptoType 加密算法类型
-     * @throws CryptoException 如果密钥长度不符合要求
-     */
-    public static void validateKeyLength(String key, CryptoType cryptoType) {
-        if (key == null) {
-            throw CryptoException.generalError("密钥不能为null", null, "验证", null);
-        }
-
-        switch (cryptoType) {
-            case AES:
-                validateAesKeyLength(key);
-                break;
-            case DES:
-                validateDesKeyLength(key);
-                break;
-            case RSA:
-                validateRsaKeyFormat(key, null); // RSA只验证私钥格式
-                break;
-            default:
-                validateAesKeyLength(key); // 默认使用AES验证
-        }
-    }
+    // ==================== 公共验证方法 ====================
 
     /**
      * 验证AES密钥长度
      *
-     * @param key AES密钥
-     * @throws CryptoException 如果密钥长度不符合AES要求
+     * @param key AES密钥字节数组
+     * @throws CryptoException 如果密钥长度不符合要求
      */
-    public static void validateAesKeyLength(String key) {
-        int keyLength = key.getBytes().length;
+    public static void validateAesKeyLength(byte[] key) {
+        if (key == null) {
+            throw CryptoException.generalError("AES密钥不能为null", null, "验证", null);
+        }
+
         boolean isValidLength = false;
-        
         for (int validLength : AES_KEY_LENGTHS) {
-            if (keyLength == validLength) {
+            if (key.length == validLength) {
                 isValidLength = true;
                 break;
             }
         }
-        
+
         if (!isValidLength) {
             throw CryptoException.generalError(
-                String.format("AES密钥长度必须为16、24或32字节，当前长度为%d字节", keyLength),
-                null, "验证", key
+                    String.format("AES密钥长度必须为16、24或32字节，当前长度为%d字节", key.length),
+                    null, "验证", key
+            );
+        }
+    }
+
+    /**
+     * 验证AES初始化向量长度
+     *
+     * @param iv AES初始化向量字节数组
+     * @throws CryptoException 如果IV长度不符合要求
+     */
+    public static void validateAesIvLength(byte[] iv) {
+        if (iv == null) {
+            throw CryptoException.generalError("AES初始化向量不能为null", null, "验证", null);
+        }
+
+        if (iv.length != AES_IV_LENGTH) {
+            throw CryptoException.generalError(
+                    String.format("AES初始化向量长度必须为16字节，当前长度为%d字节", iv.length),
+                    null, "验证", iv
             );
         }
     }
@@ -101,41 +94,105 @@ public class CryptoValidator {
     /**
      * 验证DES密钥长度
      *
-     * @param key DES密钥
-     * @throws CryptoException 如果密钥长度不符合DES要求
+     * @param key DES密钥字节数组
+     * @throws CryptoException 如果密钥长度不符合要求
      */
-    public static void validateDesKeyLength(String key) {
-        int keyLength = key.getBytes().length;
-        
-        if (keyLength != DES_KEY_LENGTH) {
+    public static void validateDesKeyLength(byte[] key) {
+        if (key == null) {
+            throw CryptoException.generalError("DES密钥不能为null", null, "验证", null);
+        }
+
+        if (key.length != DES_KEY_LENGTH) {
             throw CryptoException.generalError(
-                String.format("DES密钥长度必须为8字节，当前长度为%d字节", keyLength),
-                null, "验证", key
+                    String.format("DES密钥长度必须为8字节，当前长度为%d字节", key.length),
+                    null, "验证", key
+            );
+        }
+    }
+
+    /**
+     * 验证DES初始化向量长度
+     *
+     * @param iv DES初始化向量字节数组
+     * @throws CryptoException 如果IV长度不符合要求
+     */
+    public static void validateDesIvLength(byte[] iv) {
+        if (iv == null) {
+            throw CryptoException.generalError("DES初始化向量不能为null", null, "验证", null);
+        }
+
+        if (iv.length != DES_IV_LENGTH) {
+            throw CryptoException.generalError(
+                    String.format("DES初始化向量长度必须为8字节，当前长度为%d字节", iv.length),
+                    null, "验证", iv
             );
         }
     }
 
     /**
      * 验证RSA密钥格式
+     * 
+     * <p>仅支持Base64格式的RSA密钥</p>
      *
-     * @param privateKey RSA私钥
-     * @param publicKey RSA公钥
+     * @param privateKey RSA私钥（Base64格式）
+     * @param publicKey RSA公钥（Base64格式）
      * @throws CryptoException 如果密钥格式不正确
      */
     public static void validateRsaKeyFormat(String privateKey, String publicKey) {
-        if (privateKey != null && !privateKey.contains("-----BEGIN PRIVATE KEY-----")) {
+        // 验证私钥
+        if (privateKey != null) {
+            validateSingleRsaKey(privateKey, true);
+        }
+        
+        // 验证公钥
+        if (publicKey != null) {
+            validateSingleRsaKey(publicKey, false);
+        }
+    }
+
+    /**
+     * 验证单个RSA密钥格式
+     * 
+     * @param key RSA密钥字符串（Base64格式）
+     * @param isPrivateKey 是否为私钥
+     * @throws CryptoException 如果密钥格式不正确
+     */
+    private static void validateSingleRsaKey(String key, boolean isPrivateKey) {
+        String keyType = isPrivateKey ? "私钥" : "公钥";
+        
+        // 基本检查
+        if (key.trim().isEmpty()) {
             throw CryptoException.invalidKeyFormat(
-                "RSA私钥格式不正确，应为PEM格式，包含-----BEGIN PRIVATE KEY-----",
-                "验证", privateKey
+                "RSA" + keyType + "不能为空",
+                "验证", key
             );
         }
         
-        if (publicKey != null && !publicKey.contains("-----BEGIN PUBLIC KEY-----")) {
+        // 检查密钥格式：仅支持Base64格式
+        if (!isBase64Format(key)) {
             throw CryptoException.invalidKeyFormat(
-                "RSA公钥格式不正确，应为PEM格式，包含-----BEGIN PUBLIC KEY-----",
-                "验证", publicKey
+                "RSA" + keyType + "格式不正确。仅支持Base64格式（纯Base64编码字符串）",
+                "验证", key
             );
         }
+    }
+    
+    /**
+     * 检查是否为Base64格式
+     */
+    private static boolean isBase64Format(String key) {
+        // 移除可能的空白字符
+        String cleanKey = key.replaceAll("\\s", "");
+        
+        // Base64字符集检查
+        return cleanKey.matches("^[A-Za-z0-9+/]*={0,2}$") && cleanKey.length() > 0;
+    }
+    
+    /**
+     * 清理密钥字符串用于验证
+     */
+    private static String cleanKeyForValidation(String key) {
+        return key.replaceAll("\\s", "");  // 移除所有空白字符
     }
 
     /**
@@ -152,6 +209,68 @@ public class CryptoValidator {
                 return new int[]{DES_KEY_LENGTH};
             default:
                 return AES_KEY_LENGTHS; // 默认使用AES长度
+        }
+    }
+
+    /**
+     * 验证密钥长度是否符合算法要求
+     *
+     * @param key 密钥
+     * @param cryptoType 加密算法类型
+     * @throws CryptoException 如果密钥长度不符合要求
+     */
+    public static void validateKeyLength(String key, CryptoType cryptoType) {
+        if (key == null) {
+            throw CryptoException.generalError("密钥不能为null", null, "验证", null);
+        }
+
+        // RSA密钥格式验证单独处理
+        if (cryptoType == CryptoType.RSA) {
+            // RSA密钥验证使用专门的方法
+            return;
+        }
+
+        int keyLength = key.getBytes().length;
+        
+        switch (cryptoType) {
+            case AES:
+                boolean isValidAes = false;
+                for (int validLength : AES_KEY_LENGTHS) {
+                    if (keyLength == validLength) {
+                        isValidAes = true;
+                        break;
+                    }
+                }
+                if (!isValidAes) {
+                    throw CryptoException.generalError(
+                        String.format("AES密钥长度必须为16、24或32字节，当前长度为%d字节", keyLength),
+                        null, "验证", key
+                    );
+                }
+                break;
+            case DES:
+                if (keyLength != DES_KEY_LENGTH) {
+                    throw CryptoException.generalError(
+                        String.format("DES密钥长度必须为8字节，当前长度为%d字节", keyLength),
+                        null, "验证", key
+                    );
+                }
+                break;
+            default:
+                // 默认使用AES验证
+                boolean isValidDefault = false;
+                for (int validLength : AES_KEY_LENGTHS) {
+                    if (keyLength == validLength) {
+                        isValidDefault = true;
+                        break;
+                    }
+                }
+                if (!isValidDefault) {
+                    throw CryptoException.generalError(
+                        String.format("密钥长度必须为16、24或32字节，当前长度为%d字节", keyLength),
+                        null, "验证", key
+                    );
+                }
         }
     }
 

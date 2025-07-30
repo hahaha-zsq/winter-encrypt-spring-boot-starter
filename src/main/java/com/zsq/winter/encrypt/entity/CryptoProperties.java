@@ -6,45 +6,54 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 加密解密配置属性类
+ * 加密配置属性类
  *
- * <p>用于存储不同加密算法的配置属性，通过{@link ConfigurationProperties}注解
- * 绑定配置文件中的属性，前缀为"winter-crypto"。</p>
+ * <p>包含了项目中所有加密算法的配置参数。</p>
  *
- * <p>配置示例：</p>
+ * <h3>🔧 配置示例：</h3>
  * <pre>{@code
  * winter-crypto:
- *   # AES配置
+ *   # AES对称加密配置
  *   aes:
- *     key: "1234567890123456"         # 16字节 = 128位
- *     iv: "1234567890123456"          # 16字节 = 128位
- *     auto-adjust-iv: true            # 是否自动调整IV长度（默认true）
- *
- *   # DES配置
+ *     key: "1234567890123456"          # 16字节密钥
+ *     iv: "1234567890123456"           # 16字节初始化向量
+ *     auto-adjust-iv: true             # 自动调整IV长度
+ *   
+ *   # DES对称加密配置
  *   des:
- *     key: "12345678"                  # 8字节 = 64位
- *     iv: "87654321"                  # 8字节 = 64位
- *     auto-adjust-iv: true            # 是否自动调整IV长度（默认true）
- *
- *   # RSA配置
+ *     key: "12345678"                  # 8字节密钥
+ *     iv: "87654321"                   # 8字节初始化向量
+ *     auto-adjust-iv: true             # 自动调整IV长度
+ *   
+ *   # RSA非对称加密配置 - 推荐使用环境变量（最安全）
  *   rsa:
- *     private-key: "-----BEGIN PRIVATE KEY-----..."
- *     public-key: "-----BEGIN PUBLIC KEY-----..."
+ *     private-key: ${RSA_PRIVATE_KEY}  # 从环境变量读取（Base64格式）
+ *     public-key: ${RSA_PUBLIC_KEY}    # 从环境变量读取（Base64格式）
  *
+ *   # RSA配置 - 直接配置（不推荐用于生产环境）
+ *   # Base64格式（Hutool原生支持，无标识符）：
+ *   # rsa:
+ *   #   private-key: "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCB..."
+ *   #   public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI..."
+ *   
  *   # 通用配置
- *   is-print: true
- *   default-algorithm: AES
+ *   is-print: true                     # 是否显示启动banner
  * }</pre>
  *
- * <p>不同算法的密钥长度要求：</p>
+ * <h3>🔒 RSA密钥格式说明：</h3>
  * <ul>
- *   <li><strong>AES</strong>：密钥长度128位(16字节)、192位(24字节)、256位(32字节)，IV长度128位(16字节)</li>
- *   <li><strong>DES</strong>：密钥长度64位(8字节)，IV长度64位(8字节)</li>
- *   <li><strong>RSA</strong>：密钥长度1024位、2048位、4096位等，不需要IV</li>
+ *   <li><strong>仅支持Base64格式</strong>：纯Base64编码的密钥字符串</li>
+ *   <li><strong>密钥生成</strong>：可使用 {@code CryptoUtil.winterGenerateRsAKey()} 生成</li>
+ *   <li><strong>文件格式</strong>：密钥文件应包含纯Base64字符串，无其他标识符</li>
  * </ul>
  *
+ * <h3>⚙️ 配置方式：</h3>
+ * <ol>
+ *   <li>环境变量方式：通过 ${RSA_PRIVATE_KEY} 和 ${RSA_PUBLIC_KEY}（推荐）</li>
+ *   <li>直接配置方式：private-key 和 public-key（不推荐用于生产环境）</li>
+ * </ol>
+ *
  * @author dadandiaoming
- * @see ConfigurationProperties
  * @since 1.0.0
  */
 @Data
@@ -159,22 +168,50 @@ public class CryptoProperties {
      * <p>RSA算法要求：
      * - 密钥长度：1024位、2048位、4096位等
      * - 不需要IV</p>
+     * 
+     * <p>安全配置方式（按优先级排序）：</p>
+     * <ol>
+     *   <li>环境变量方式：通过 ${RSA_PRIVATE_KEY} 和 ${RSA_PUBLIC_KEY}（推荐）</li>
+     *   <li>直接配置方式：private-key 和 public-key（不推荐用于生产环境）</li>
+     * </ol>
      */
     @Data
     public static class RsaConfig {
         /**
          * RSA私钥
          *
-         * <p>格式：PEM格式的私钥</p>
+         * <p>仅支持Base64字符串（PKCS#8格式，无PEM头尾），建议用{@code CryptoUtil.winterGenerateRsAKey()}生成。</p>
+         * <p>安全建议：生产环境请使用环境变量：${RSA_PRIVATE_KEY}</p>
          */
         private String privateKey;
 
         /**
          * RSA公钥
          *
-         * <p>格式：PEM格式的公钥</p>
+         * <p>仅支持Base64字符串（X.509格式，无PEM头尾），建议用{@code CryptoUtil.winterGenerateRsAKey()}生成。</p>
+         * <p>安全建议：生产环境请使用环境变量：${RSA_PUBLIC_KEY}</p>
          */
         private String publicKey;
+
+
+
+        /**
+         * 获取实际的私钥内容
+         *
+         * @return 私钥内容
+         */
+        public String getActualPrivateKey() {
+            return privateKey;
+        }
+
+        /**
+         * 获取实际的公钥内容
+         *
+         * @return 公钥内容
+         */
+        public String getActualPublicKey() {
+            return publicKey;
+        }
     }
 
     /**
@@ -190,7 +227,7 @@ public class CryptoProperties {
             case DES:
                 return des.getKey();
             case RSA:
-                return rsa.getPrivateKey(); // RSA使用私钥进行加密
+                return rsa.getActualPrivateKey(); // RSA使用私钥进行加密
             default:
                 return aes.getKey(); // 默认使用AES
         }
@@ -205,11 +242,11 @@ public class CryptoProperties {
     public String getDecryptKey(CryptoType cryptoType) {
         switch (cryptoType) {
             case AES:
-                return aes.getKey(); // 对称加密，解密密钥就是加密密钥
+                return aes.getKey();
             case DES:
-                return des.getKey(); // 对称加密，解密密钥就是加密密钥
+                return des.getKey();
             case RSA:
-                return rsa.getPublicKey(); // RSA使用公钥进行解密
+                return rsa.getActualPublicKey(); // RSA使用公钥进行解密
             default:
                 return aes.getKey(); // 默认使用AES
         }
