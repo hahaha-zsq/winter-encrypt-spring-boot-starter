@@ -5,16 +5,19 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.crypto.Mode;
 import cn.hutool.crypto.Padding;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
-import cn.hutool.crypto.asymmetric.SignAlgorithm;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.crypto.symmetric.AES;
 import cn.hutool.crypto.symmetric.DES;
 import cn.hutool.crypto.symmetric.SymmetricAlgorithm;
-import com.zsq.winter.encrypt.enums.CryptoType;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.crypto.Cipher;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -312,33 +315,23 @@ public class CryptoUtil {
     }
 
     /**
-     * 生成RSA公私钥对
-     *
-     * <p>适用于非对称加密、数字签名等场景。</p>
-     * <p><strong>注意：</strong>生成的密钥为PKCS#8格式，兼容性更好。</p>
-     *
-     * @return Map，包含privateKey和publicKey（Base64格式）
+     * 使用BouncyCastle生成RSA密钥对（Base64编码，privateKey为PKCS#8，publicKey为X.509）
+     * @return Map，包含privateKey和publicKey（Base64字符串）
      */
     public static Map<String, String> winterGenerateRsAKey() {
         try {
-            // 使用Java原生的KeyPairGenerator生成RSA密钥对
-            java.security.KeyPairGenerator keyPairGenerator = java.security.KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048); // 使用2048位密钥长度
-            java.security.KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            
-            // 获取私钥和公钥
-            java.security.PrivateKey privateKey = keyPair.getPrivate();
-            java.security.PublicKey publicKey = keyPair.getPublic();
-            
-            // 转换为Base64格式
-            String privateKeyBase64 = java.util.Base64.getEncoder().encodeToString(privateKey.getEncoded());
-            String publicKeyBase64 = java.util.Base64.getEncoder().encodeToString(publicKey.getEncoded());
-            
-            // 将私钥和公钥存入Map中
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            PrivateKey privateKey = keyPair.getPrivate();
+            PublicKey publicKey = keyPair.getPublic();
+            String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey.getEncoded());
+            String publicKeyBase64 = Base64.getEncoder().encodeToString(publicKey.getEncoded());
             Map<String, String> map = new HashMap<>();
             map.put("privateKey", privateKeyBase64);
             map.put("publicKey", publicKeyBase64);
-            
             return map;
         } catch (Exception e) {
             throw new RuntimeException("生成RSA密钥对失败", e);
@@ -346,228 +339,42 @@ public class CryptoUtil {
     }
 
     /**
-     * 使用公钥加密字符串，返回Base64密文
-     *
-     * @param content 明文内容
-     * @param publicKeyBase64 公钥（Base64字符串，PKCS#8格式）
-     * @return 加密后的Base64字符串
+     * 使用BouncyCastle公钥加密，返回Base64密文
      */
     public static String rsaEncryptToBase64(String content, String publicKeyBase64) {
         try {
-            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("RSA");
-            byte[] keyBytes = java.util.Base64.getDecoder().decode(publicKeyBase64);
-            java.security.spec.X509EncodedKeySpec keySpec = new java.security.spec.X509EncodedKeySpec(keyBytes);
-            java.security.PublicKey publicKey = keyFactory.generatePublic(keySpec);
-
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encrypted = cipher.doFinal(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            return java.util.Base64.getEncoder().encodeToString(encrypted);
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            byte[] keyBytes = Base64.getDecoder().decode(publicKeyBase64);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
             throw new RuntimeException("RSA加密失败", e);
         }
     }
 
     /**
-     * 使用私钥解密Base64密文，返回明文字符串
-     *
-     * @param base64Cipher Base64密文
-     * @param privateKeyBase64 私钥（Base64字符串，PKCS#8格式）
-     * @return 解密后的明文
+     * 使用BouncyCastle私钥解密Base64密文
      */
     public static String rsaDecryptFromBase64(String base64Cipher, String privateKeyBase64) {
         try {
-            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("RSA");
-            byte[] keyBytes = java.util.Base64.getDecoder().decode(privateKeyBase64);
-            java.security.spec.PKCS8EncodedKeySpec keySpec = new java.security.spec.PKCS8EncodedKeySpec(keyBytes);
-            java.security.PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, privateKey);
-            byte[] decrypted = cipher.doFinal(java.util.Base64.getDecoder().decode(base64Cipher));
-            return new String(decrypted, java.nio.charset.StandardCharsets.UTF_8);
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(base64Cipher));
+            return new String(decrypted, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException("RSA解密失败", e);
         }
-    }
-    /**
-     * 使用RSA公钥加密数据
-     *
-     * <p>公钥加密，私钥解密，适合数据传输安全。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param content    明文内容
-     * @return 加密后的字节数组
-     */
-    public static byte[] winterRsAPublicKeyEncrypt(String privateKey, String publicKey, String content) {
-        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-
-        // 使用公钥对内容进行加密，并返回加密后的字节数组。加密过程确保只有持有对应私钥的接收方才能解密。
-        return rsa.encrypt(content.getBytes(), KeyType.PublicKey);
-    }
-
-    /**
-     * 使用RSA私钥加密数据
-     *
-     * <p>私钥加密，公钥解密，适合数字签名。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param content    明文内容
-     * @return 加密后的字节数组
-     */
-    public static byte[] winterRsAPrivateKeyEncrypt(String privateKey, String publicKey, String content) {
-        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-
-        // 使用私钥对内容进行加密，并返回加密后的字节数组。
-        return rsa.encrypt(content.getBytes(), KeyType.PrivateKey);
-    }
-
-    /**
-     * 使用RSA公钥加密数据，返回十六进制格式
-     *
-     * <p>公钥加密，私钥解密，适合数据传输安全。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param content    明文内容
-     * @return 加密后的十六进制字符串
-     */
-    public static String winterRsAPublicKeyEncryptHex(String privateKey, String publicKey, String content) {
-        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-
-        // 使用公钥对内容进行加密，并返回十六进制格式的加密字符串。
-        return rsa.encryptHex(content.getBytes(), KeyType.PublicKey);
-    }
-
-    /**
-     * 使用RSA私钥加密数据，返回十六进制格式
-     *
-     * <p>私钥加密，公钥解密，适合数字签名。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param content    明文内容
-     * @return 加密后的十六进制字符串
-     */
-    public static String winterRsAPrivateKeyEncryptHex(String privateKey, String publicKey, String content) {
-        // 创建RSA对象并初始化公钥和私钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-
-        // 使用私钥对内容进行加密，并返回十六进制格式的加密字符串。
-        return rsa.encryptHex(content.getBytes(), KeyType.PrivateKey);
-    }
-
-    /**
-     * 使用RSA私钥解密公钥加密的数据
-     *
-     * <p>适合公钥加密、私钥解密的场景。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param encrypted  加密内容
-     * @return 解密后的字节数组
-     */
-    public static byte[] winterRsAPrivateKeyDecrypt(String privateKey, String publicKey, String encrypted) {
-        // 初始化RSA加密器，同时加载私钥和公钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-        // 使用私钥对加密数据进行解密操作。
-        return rsa.decrypt(encrypted, KeyType.PrivateKey);
-    }
-
-    /**
-     * 使用RSA公钥解密私钥加密的数据
-     *
-     * <p>适合私钥加密、公钥解密的场景。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param encrypted  加密内容
-     * @return 解密后的字节数组
-     */
-    public static byte[] winterRsAPublicKeyDecrypt(String privateKey, String publicKey, String encrypted) {
-        // 初始化RSA加密器，同时加载私钥和公钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-        // 使用公钥对加密数据进行解密操作。
-        return rsa.decrypt(encrypted, KeyType.PublicKey);
-    }
-
-    /**
-     * 使用RSA私钥解密十六进制格式的数据
-     *
-     * <p>适合公钥加密、私钥解密的场景。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param encrypted  十六进制格式的加密内容
-     * @return 解密后的字符串
-     */
-    public static String winterRsAPrivateKeyDecryptHex(String privateKey, String publicKey, String encrypted) {
-        // 初始化RSA加密器，同时加载私钥和公钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-        // 使用私钥对十六进制加密数据进行解密操作。
-        return rsa.decryptStr(encrypted, KeyType.PrivateKey);
-    }
-
-    /**
-     * 使用RSA公钥解密十六进制格式的数据
-     *
-     * <p>适合私钥加密、公钥解密的场景。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param encrypted  十六进制格式的加密内容
-     * @return 解密后的字符串
-     */
-    public static String winterRsAPublicKeyDecryptHex(String privateKey, String publicKey, String encrypted) {
-        // 初始化RSA加密器，同时加载私钥和公钥。Hutool库的RSA类只支持Base64格式密钥。
-        RSA rsa = new RSA(privateKey, publicKey);
-        // 使用公钥对十六进制加密数据进行解密操作。
-        return rsa.decryptStr(encrypted, KeyType.PublicKey);
-    }
-
-    /**
-     * 使用MD5withRSA算法进行数字签名
-     *
-     * <p>常用于身份认证、数据完整性校验。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param content    原文内容
-     * @return 数字签名字节数组
-     */
-    public static byte[] winterMd5withRsaSign(String privateKey, String publicKey, String content) {
-        // 使用Base64格式的私钥、公钥进行MD5withRSA签名，Hutool库只支持Base64格式密钥
-        return SecureUtil.sign(SignAlgorithm.MD5withRSA, privateKey, publicKey).sign(content.getBytes());
-    }
-
-    /**
-     * 验证MD5withRSA数字签名
-     *
-     * <p>常用于身份认证、数据完整性校验。</p>
-     * <p><strong>注意：</strong>privateKey和publicKey必须是Base64格式的密钥。</p>
-     *
-     * @param privateKey 私钥（Base64格式）
-     * @param publicKey  公钥（Base64格式）
-     * @param signData   签名数据
-     * @param content    原文内容
-     * @return 验证通过返回true，否则false
-     */
-    public static boolean winterMd5withRsaVerify(String privateKey, String publicKey, byte[] signData, String content) {
-        // 使用Base64格式的私钥、公钥进行MD5withRSA签名验证，Hutool库只支持Base64格式密钥
-        return SecureUtil.sign(SignAlgorithm.MD5withRSA, privateKey, publicKey).verify(content.getBytes(), signData);
     }
 }

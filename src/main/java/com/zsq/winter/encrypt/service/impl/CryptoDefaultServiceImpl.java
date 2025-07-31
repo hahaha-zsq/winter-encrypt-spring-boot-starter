@@ -116,15 +116,6 @@ public class CryptoDefaultServiceImpl implements CryptoService {
         return str;
     }
 
-    /**
-     * RSA加密数据的方法
-     *
-     * @param content    待加密的内容，即原始数据
-     * @param privateKey RSA私钥（不再使用）
-     * @param publicKey  RSA公钥（Base64字符串）
-     * @return 返回加密后的Base64字符串
-     * @throws CryptoException 如果参数为null或密钥格式不正确
-     */
     @Override
     public String encryptRsa(String content, String privateKey, String publicKey) {
         if (content == null) {
@@ -133,19 +124,10 @@ public class CryptoDefaultServiceImpl implements CryptoService {
         if (publicKey == null || publicKey.trim().isEmpty()) {
             throw CryptoException.generalError("RSA公钥不能为空", null, "RSA加密", publicKey);
         }
-        // 只用公钥加密
+        // 只用公钥加密，调用BouncyCastle实现
         return CryptoUtil.rsaEncryptToBase64(content, publicKey);
     }
 
-    /**
-     * RSA解密数据的方法
-     *
-     * @param content    待解密的内容（Base64密文）
-     * @param publicKey  RSA公钥（不再使用）
-     * @param privateKey RSA私钥（Base64字符串）
-     * @return 返回解密后的明文
-     * @throws CryptoException 如果参数为null或密钥格式不正确
-     */
     @Override
     public String decryptRsa(String content, String publicKey, String privateKey) {
         if (content == null || content.trim().isEmpty()) {
@@ -154,7 +136,7 @@ public class CryptoDefaultServiceImpl implements CryptoService {
         if (privateKey == null || privateKey.trim().isEmpty()) {
             throw CryptoException.generalError("RSA私钥不能为空", null, "RSA解密", privateKey);
         }
-        // 只用私钥解密
+        // 只用私钥解密，调用BouncyCastle实现
         return CryptoUtil.rsaDecryptFromBase64(content, privateKey);
     }
 

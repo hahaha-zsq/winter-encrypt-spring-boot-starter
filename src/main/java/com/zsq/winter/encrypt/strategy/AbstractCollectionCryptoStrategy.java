@@ -69,9 +69,17 @@ public abstract class AbstractCollectionCryptoStrategy implements CollectionCryp
             throw CryptoException.emptyData("加密", item);
         }
         
+        // 检查是否为字符串类型
+        if (!(item instanceof String)) {
+            String dataType = item.getClass().getSimpleName();
+            log.error("加密失败：数据必须是字符串类型，当前类型: {}, 数据: {}", dataType, item);
+            throw CryptoException.unsupportedDataType("加密", dataType, item);
+        }
+        
         try {
-            String jsonStr = JSONUtil.toJsonStr(item);
-            return encryptSymmetricItem(jsonStr, cryptoService, annotation, encryptKey, iv);
+            // 直接使用字符串，不进行JSON转换
+            String stringValue = (String) item;
+            return encryptSymmetricItem(stringValue, cryptoService, annotation, encryptKey, iv);
         } catch (Exception e) {
             log.error("对称加密集合元素失败: {}", item, e);
             throw CryptoException.containerCryptoError("对称加密集合元素失败", e, "对称加密", item);
@@ -99,15 +107,23 @@ public abstract class AbstractCollectionCryptoStrategy implements CollectionCryp
             throw CryptoException.emptyData("RSA加密", item);
         }
         
+        // 检查是否为字符串类型
+        if (!(item instanceof String)) {
+            String dataType = item.getClass().getSimpleName();
+            log.error("RSA加密失败：数据必须是字符串类型，当前类型: {}, 数据: {}", dataType, item);
+            throw CryptoException.unsupportedDataType("RSA加密", dataType, item);
+        }
+        
         try {
-            String jsonStr = JSONUtil.toJsonStr(item);
+            // 直接使用字符串，不进行JSON转换
+            String stringValue = (String) item;
             
             // RSA加密特有的优化：检查数据长度
-            if (jsonStr.length() > 117) { // RSA-1024的最大加密长度约为117字节
-                log.warn("RSA加密数据长度较长: {} 字符，可能影响性能", jsonStr.length());
+            if (stringValue.length() > 117) { // RSA-1024的最大加密长度约为117字节
+                log.warn("RSA加密数据长度较长: {} 字符，可能影响性能", stringValue.length());
             }
             
-            return cryptoService.encryptRsa(jsonStr, privateKey, publicKey);
+            return cryptoService.encryptRsa(stringValue, privateKey, publicKey);
         } catch (Exception e) {
             log.error("RSA加密集合元素失败: {}", item, e);
             throw CryptoException.containerCryptoError("RSA加密集合元素失败", e, "RSA加密", item);
@@ -286,6 +302,8 @@ public abstract class AbstractCollectionCryptoStrategy implements CollectionCryp
             return false;
         }
     }
+
+
 
     /**
      * 记录处理日志

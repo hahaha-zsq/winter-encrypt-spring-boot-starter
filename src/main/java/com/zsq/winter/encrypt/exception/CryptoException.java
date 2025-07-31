@@ -37,6 +37,8 @@ public class CryptoException extends RuntimeException {
         CONTAINER_CRYPTO_ERROR("容器加密解密错误"),
         /** 密钥格式错误 */
         INVALID_KEY_FORMAT("密钥格式不正确"),
+        /** 不支持的数据类型错误 */
+        UNSUPPORTED_DATA_TYPE("不支持的数据类型，只支持字符串类型"),
         /** 通用错误 */
         GENERAL_ERROR("通用错误");
 
@@ -218,5 +220,24 @@ public class CryptoException extends RuntimeException {
      */
     public static CryptoException generalError(String message, Throwable cause, String operation, Object data) {
         return new CryptoException(message, cause, ErrorType.GENERAL_ERROR, operation, data);
+    }
+
+    /**
+     * 创建不支持的数据类型异常
+     * 
+     * <p>当遇到不支持的数据类型时使用此方法创建异常。</p>
+     *
+     * @param operation 操作类型（加密/解密）
+     * @param dataType 数据类型名称
+     * @param data 数据对象
+     * @return CryptoException实例
+     */
+    public static CryptoException unsupportedDataType(String operation, String dataType, Object data) {
+        return new CryptoException(
+            String.format("不支持的数据类型: %s，只支持字符串类型", dataType),
+            ErrorType.UNSUPPORTED_DATA_TYPE,
+            operation,
+            data
+        );
     }
 } 

@@ -14,7 +14,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * 加密解密切面类
@@ -203,6 +207,10 @@ public class CryptoAspect {
         // 处理集合类型的字段（List、Set、Map、Queue、Array等）
         if (containerCryptoService.isSupportedContainer(value)) {
             logCollectionField("对称加密", field, value);
+            
+            // AOP层容器元素类型检查
+            validateContainerElementsAreString(value, field.getName(), "对称加密");
+            
             try {
                 String encryptKey = cryptoProperties.getEncryptKey(annotation.cryptoType());
                 String iv = cryptoProperties.getIv(annotation.cryptoType());
@@ -221,19 +229,24 @@ public class CryptoAspect {
                     field.getName(), e.getErrorType(), e.getMessage());
                 throw e;
             }
-        } else {
-            // 处理普通字段
-            String jsonStr = JSONUtil.toJsonStr(value);
+        } else if (value instanceof String) {
+            // 处理普通字符串字段
+            String stringValue = (String) value;
             String encryptedValue = cryptoService.encrypt(
                     annotation.mode(),
                     annotation.padding(),
-                    jsonStr,
+                    stringValue,
                     cryptoProperties.getEncryptKey(annotation.cryptoType()),
                     cryptoProperties.getIv(annotation.cryptoType()),
                     annotation.cryptoType()
             );
             // 将加密后的值设置回字段
             field.set(result, encryptedValue);
+        } else {
+            // 不支持的数据类型
+            String dataType = value != null ? value.getClass().getSimpleName() : "null";
+            log.error("加密失败：字段 {} 的数据类型不支持，当前类型: {}, 只支持字符串类型", field.getName(), dataType);
+            throw CryptoException.unsupportedDataType("加密", dataType, value);
         }
     }
 
@@ -250,6 +263,10 @@ public class CryptoAspect {
         // 处理集合类型的字段
         if (containerCryptoService.isSupportedContainer(value)) {
             logCollectionField("RSA加密", field, value);
+            
+            // AOP层容器元素类型检查
+            validateContainerElementsAreString(value, field.getName(), "RSA加密");
+            
             try {
                 String privateKey = cryptoProperties.getEncryptKey(annotation.cryptoType());
                 String publicKey = cryptoProperties.getDecryptKey(annotation.cryptoType());
@@ -266,15 +283,20 @@ public class CryptoAspect {
                     field.getName(), e.getErrorType(), e.getMessage());
                 throw e;
             }
-        } else {
-            // 处理普通字段
-            String jsonStr = JSONUtil.toJsonStr(value);
+        } else if (value instanceof String) {
+            // 处理普通字符串字段
+            String stringValue = (String) value;
             String encryptedValue = cryptoService.encryptRsa(
-                    jsonStr,
+                    stringValue,
                     cryptoProperties.getEncryptKey(annotation.cryptoType()),
                     cryptoProperties.getDecryptKey(annotation.cryptoType())
             );
             field.set(result, encryptedValue);
+        } else {
+            // 不支持的数据类型
+            String dataType = value != null ? value.getClass().getSimpleName() : "null";
+            log.error("RSA加密失败：字段 {} 的数据类型不支持，当前类型: {}, 只支持字符串类型", field.getName(), dataType);
+            throw CryptoException.unsupportedDataType("RSA加密", dataType, value);
         }
     }
 
@@ -291,6 +313,10 @@ public class CryptoAspect {
         // 处理集合类型的字段
         if (containerCryptoService.isSupportedContainer(value)) {
             logCollectionField("对称解密", field, value);
+            
+            // AOP层容器元素类型检查
+            validateContainerElementsAreString(value, field.getName(), "对称解密");
+            
             try {
                 String decryptKey = cryptoProperties.getDecryptKey(annotation.cryptoType());
                 String iv = cryptoProperties.getIv(annotation.cryptoType());
@@ -325,6 +351,11 @@ public class CryptoAspect {
                 log.error("对称解密字段失败，字段: {}, 错误: {}", field.getName(), e.getMessage());
                 throw new RuntimeException("对称解密字段失败", e);
             }
+        } else {
+            // 不支持的数据类型
+            String dataType = value != null ? value.getClass().getSimpleName() : "null";
+            log.error("对称解密失败：字段 {} 的数据类型不支持，当前类型: {}, 只支持字符串类型", field.getName(), dataType);
+            throw CryptoException.unsupportedDataType("对称解密", dataType, value);
         }
     }
 
@@ -341,6 +372,10 @@ public class CryptoAspect {
         // 处理集合类型的字段
         if (containerCryptoService.isSupportedContainer(value)) {
             logCollectionField("RSA解密", field, value);
+            
+            // AOP层容器元素类型检查
+            validateContainerElementsAreString(value, field.getName(), "RSA解密");
+            
             try {
                 String publicKey = cryptoProperties.getDecryptKey(annotation.cryptoType());
                 String privateKey = cryptoProperties.getEncryptKey(annotation.cryptoType());
@@ -371,6 +406,93 @@ public class CryptoAspect {
             } catch (Exception e) {
                 log.error("RSA解密字段失败，字段: {}, 错误: {}", field.getName(), e.getMessage());
                 throw new RuntimeException("RSA解密字段失败", e);
+            }
+        } else {
+            // 不支持的数据类型
+            String dataType = value != null ? value.getClass().getSimpleName() : "null";
+            log.error("RSA解密失败：字段 {} 的数据类型不支持，当前类型: {}, 只支持字符串类型", field.getName(), dataType);
+            throw CryptoException.unsupportedDataType("RSA解密", dataType, value);
+        }
+    }
+
+    /**
+     * 检查容器中所有元素是否都是字符串类型
+     * 
+     * <p>在AOP层检查容器中的所有元素是否都是字符串类型。
+     * 如果发现非字符串元素，立即抛出异常。</p>
+     *
+     * @param container 待检查的容器
+     * @param fieldName 字段名称
+     * @param operation 操作类型（加密/解密）
+     * @throws CryptoException 当发现非字符串元素时抛出
+     */
+    private void validateContainerElementsAreString(Object container, String fieldName, String operation) {
+        if (Objects.isNull(container)) {
+            return;
+        }
+        
+        if (container instanceof List) {
+            List<?> list = (List<?>) container;
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
+                if (!Objects.isNull(item) && !(item instanceof String)) {
+                    String dataType = item.getClass().getSimpleName();
+                    log.error("{}失败：字段 {} 的List中第{}个元素不是字符串类型，当前类型: {}, 元素值: {}", 
+                        operation, fieldName, i + 1, dataType, item);
+                    throw CryptoException.unsupportedDataType(operation, 
+                        String.format("字段 %s 的List中第%d个元素类型: %s", fieldName, i + 1, dataType), item);
+                }
+            }
+        } else if (container instanceof Set) {
+            Set<?> set = (Set<?>) container;
+            int index = 0;
+            for (Object item : set) {
+                index++;
+                if (!Objects.isNull(item) && !(item instanceof String)) {
+                    String dataType = item.getClass().getSimpleName();
+                    log.error("{}失败：字段 {} 的Set中第{}个元素不是字符串类型，当前类型: {}, 元素值: {}", 
+                        operation, fieldName, index, dataType, item);
+                    throw CryptoException.unsupportedDataType(operation, 
+                        String.format("字段 %s 的Set中第%d个元素类型: %s", fieldName, index, dataType), item);
+                }
+            }
+        } else if (container instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) container;
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                Object key = entry.getKey();
+                if (!Objects.isNull(value) && !(value instanceof String)) {
+                    String dataType = value.getClass().getSimpleName();
+                    log.error("{}失败：字段 {} 的Map中键[{}]对应的值不是字符串类型，当前类型: {}, 值: {}", 
+                        operation, fieldName, key, dataType, value);
+                    throw CryptoException.unsupportedDataType(operation, 
+                        String.format("字段 %s 的Map中键[%s]对应的值类型: %s", fieldName, key, dataType), value);
+                }
+            }
+        } else if (container instanceof Queue) {
+            Queue<?> queue = (Queue<?>) container;
+            int index = 0;
+            for (Object item : queue) {
+                index++;
+                if (!Objects.isNull(item) && !(item instanceof String)) {
+                    String dataType = item.getClass().getSimpleName();
+                    log.error("{}失败：字段 {} 的Queue中第{}个元素不是字符串类型，当前类型: {}, 元素值: {}", 
+                        operation, fieldName, index, dataType, item);
+                    throw CryptoException.unsupportedDataType(operation, 
+                        String.format("字段 %s 的Queue中第%d个元素类型: %s", fieldName, index, dataType), item);
+                }
+            }
+        } else if (container.getClass().isArray()) {
+            Object[] array = (Object[]) container;
+            for (int i = 0; i < array.length; i++) {
+                Object item = array[i];
+                if (!Objects.isNull(item) && !(item instanceof String)) {
+                    String dataType = item.getClass().getSimpleName();
+                    log.error("{}失败：字段 {} 的Array中第{}个元素不是字符串类型，当前类型: {}, 元素值: {}", 
+                        operation, fieldName, i + 1, dataType, item);
+                    throw CryptoException.unsupportedDataType(operation, 
+                        String.format("字段 %s 的Array中第%d个元素类型: %s", fieldName, i + 1, dataType), item);
+                }
             }
         }
     }
