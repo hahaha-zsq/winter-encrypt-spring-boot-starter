@@ -125,15 +125,7 @@ public class CryptoAutoConfiguration {
         return new MapCryptoStrategy();
     }
 
-    /**
-     * 创建Queue集合加密解密策略Bean
-     * 
-     * @return QueueCryptoStrategy实例
-     */
-    @Bean
-    public QueueCryptoStrategy queueCryptoStrategy() {
-        return new QueueCryptoStrategy();
-    }
+
 
     /**
      * 创建Array数组加密解密策略Bean
@@ -162,7 +154,7 @@ public class CryptoAutoConfiguration {
     /**
      * 创建容器加密解密服务Bean
      * 
-     * <p>该服务负责处理各种容器类型（List、Set、Map、Queue、Array）的加密解密操作。</p>
+     * <p>该服务负责处理各种容器类型（List、Set、Map、Array）的加密解密操作。</p>
      *
      * @param strategyFactory 策略工厂，用于获取具体的加密解密策略
      * @return ContainerCryptoService实例

@@ -22,7 +22,6 @@ import java.util.Map;
  *   <li>{@link CollectionStrategyType#LIST} - List集合策略</li>
  *   <li>{@link CollectionStrategyType#SET} - Set集合策略</li>
  *   <li>{@link CollectionStrategyType#MAP} - Map集合策略</li>
- *   <li>{@link CollectionStrategyType#QUEUE} - Queue集合策略</li>
  * </ul>
  * 
  * @author dadandiaoming

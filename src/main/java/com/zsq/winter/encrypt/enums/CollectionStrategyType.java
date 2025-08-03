@@ -10,8 +10,7 @@ public enum CollectionStrategyType {
     LIST(1, "List集合"),
     SET(2, "Set集合"),
     MAP(3, "Map集合"),
-    QUEUE(4, "Queue集合"),
-    ARRAY(5, "数组");
+    ARRAY(4, "数组");
 
     private final int code;
     private final String desc;

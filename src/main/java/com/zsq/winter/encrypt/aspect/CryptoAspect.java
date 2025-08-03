@@ -17,14 +17,14 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
+
 import java.util.Set;
 
 /**
  * 加密解密切面类
  * 使用AOP技术，在方法执行前后自动进行加密解密处理
  * 支持对方法参数和返回值中的字段进行加密解密
- * 支持对List、Set、Map、Queue、Array等各种集合类型中的字段进行加密解密处理
+ * 支持对List、Set、Map、Array等各种集合类型中的字段进行加密解密处理
  * 
  * 加密类型处理策略：
  * - DES/AES：使用容器策略进行加解密
@@ -74,7 +74,7 @@ public class CryptoAspect {
      *   <li>对带有注解的字段，获取字段值并转换为JSON字符串</li>
      *   <li>根据注解中的加密参数和配置属性进行加密</li>
      *   <li>将加密后的值设置回字段</li>
-     *   <li>支持对List、Set、Map、Queue、Array等各种集合类型中的字段进行加密处理</li>
+     *   <li>支持对List、Set、Map、Array等各种集合类型中的字段进行加密处理</li>
      * </ol>
      * </p>
      *
@@ -132,7 +132,7 @@ public class CryptoAspect {
      * 环绕通知，拦截标注了@Decrypt注解的方法
      * 在方法执行前，对方法参数中标注了@FieldDecrypt注解的字段进行解密处理
      * 解密完成后，再执行原方法并返回结果
-     * 支持对List、Set、Map、Queue、Array等各种集合类型中的字段进行解密处理
+     * 支持对List、Set、Map、Array等各种集合类型中的字段进行解密处理
      *
      * @param joinPoint 连接点，包含被拦截方法的信息和参数
      * @return 原方法执行的结果
@@ -204,7 +204,7 @@ public class CryptoAspect {
      * @throws Exception 加密异常
      */
     private void processSymmetricEncryption(Field field, Object result, Object value, FieldEncrypt annotation) throws Exception {
-        // 处理集合类型的字段（List、Set、Map、Queue、Array等）
+        // 处理集合类型的字段（List、Set、Map、Array等）
         if (containerCryptoService.isSupportedContainer(value)) {
             logCollectionField("对称加密", field, value);
             
@@ -467,19 +467,6 @@ public class CryptoAspect {
                         operation, fieldName, key, dataType, value);
                     throw CryptoException.unsupportedDataType(operation, 
                         String.format("字段 %s 的Map中键[%s]对应的值类型: %s", fieldName, key, dataType), value);
-                }
-            }
-        } else if (container instanceof Queue) {
-            Queue<?> queue = (Queue<?>) container;
-            int index = 0;
-            for (Object item : queue) {
-                index++;
-                if (!Objects.isNull(item) && !(item instanceof String)) {
-                    String dataType = item.getClass().getSimpleName();
-                    log.error("{}失败：字段 {} 的Queue中第{}个元素不是字符串类型，当前类型: {}, 元素值: {}", 
-                        operation, fieldName, index, dataType, item);
-                    throw CryptoException.unsupportedDataType(operation, 
-                        String.format("字段 %s 的Queue中第%d个元素类型: %s", fieldName, index, dataType), item);
                 }
             }
         } else if (container.getClass().isArray()) {
