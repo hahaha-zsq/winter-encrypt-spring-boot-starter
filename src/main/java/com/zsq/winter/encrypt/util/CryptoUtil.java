@@ -12,8 +12,13 @@ import cn.hutool.crypto.symmetric.SymmetricAlgorithm;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -31,11 +36,20 @@ import java.util.Map;
  *   <li>DES加密解密</li>
  *   <li>MD5、SHA1等哈希算法</li>
  *   <li>RSA非对称加密解密（仅支持Base64格式密钥）</li>
+ *   <li>国密SM2非对称加密解密、数字签名验证</li>
+ *   <li>国密SM3杂凑算法</li>
+ *   <li>国密SM4对称加密解密（支持ECB、CBC模式）</li>
  *   <li>数字签名</li>
  * </ul>
  *
- * <p>该类基于Hutool工具库实现，提供了简单易用的加密解密接口。</p>
- * <p><strong>注意：</strong>RSA加解密方法仅支持Base64格式的密钥，不支持PEM格式。</p>
+ * <p>该类基于Hutool工具库和BouncyCastle密码库实现，提供了简单易用的加密解密接口。</p>
+ * <p><strong>注意：</strong>RSA和SM2加解密方法仅支持Base64格式的密钥，不支持PEM格式。</p>
+ * <p><strong>国密算法说明：</strong></p>
+ * <ul>
+ *   <li>SM2：椭圆曲线公钥密码算法，用于非对称加密和数字签名</li>
+ *   <li>SM3：杂凑算法，类似于SHA-256，输出256位摘要</li>
+ *   <li>SM4：分组密码算法，密钥长度128位，分组长度128位</li>
+ * </ul>
  *
  * @author dadandiaoming
  * @since 1.0.0
@@ -376,5 +390,368 @@ public class CryptoUtil {
         } catch (Exception e) {
             throw new RuntimeException("RSA解密失败", e);
         }
+    }
+
+    // ==================== 国密算法相关方法 ====================
+
+    /**
+     * 生成SM2密钥对（使用BouncyCastle）
+     * 
+     * @return Map，包含privateKey和publicKey（Base64字符串）
+     * @throws RuntimeException 如果生成失败
+     */
+    public static Map<String, String> winterGenerateSm2Key() {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            // 获取SM2椭圆曲线的参数
+            ECGenParameterSpec sm2Spec = new ECGenParameterSpec("sm2p256v1");
+            // 获取一个椭圆曲线类型的密钥对生成器
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC", "BC");
+            // 使用SM2参数初始化生成器
+            kpg.initialize(sm2Spec, new SecureRandom());
+            
+            // 获取密钥对
+            KeyPair keyPair = kpg.generateKeyPair();
+            PrivateKey privateKey = keyPair.getPrivate();
+            PublicKey publicKey = keyPair.getPublic();
+            
+            String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey.getEncoded());
+            String publicKeyBase64 = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+            
+            Map<String, String> map = new HashMap<>();
+            map.put("privateKey", privateKeyBase64);
+            map.put("publicKey", publicKeyBase64);
+            return map;
+        } catch (Exception e) {
+            throw new RuntimeException("生成SM2密钥对失败", e);
+        }
+    }
+
+    /**
+     * 使用SM2公钥加密，返回Base64密文
+     * 
+     * @param content 待加密内容
+     * @param publicKeyBase64 SM2公钥（Base64编码）
+     * @return Base64密文
+     * @throws RuntimeException 如果加密失败
+     */
+    public static String winterSm2EncryptToBase64(String content, String publicKeyBase64) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            byte[] keyBytes = Base64.getDecoder().decode(publicKeyBase64);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+            
+            Cipher cipher = Cipher.getInstance("SM2", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+            
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            throw new RuntimeException("SM2加密失败", e);
+        }
+    }
+
+    /**
+     * 使用SM2私钥解密Base64密文
+     * 
+     * @param base64Cipher Base64密文
+     * @param privateKeyBase64 SM2私钥（Base64编码）
+     * @return 解密后的原文
+     * @throws RuntimeException 如果解密失败
+     */
+    public static String winterSm2DecryptFromBase64(String base64Cipher, String privateKeyBase64) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            
+            Cipher cipher = Cipher.getInstance("SM2", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(base64Cipher));
+            
+            return new String(decrypted, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("SM2解密失败", e);
+        }
+    }
+
+    /**
+     * 使用SM2私钥进行数字签名
+     * 
+     * @param content 待签名内容
+     * @param privateKeyBase64 SM2私钥（Base64编码）
+     * @return 签名结果（Base64编码）
+     * @throws RuntimeException 如果签名失败
+     */
+    public static String winterSm2Sign(String content, String privateKeyBase64) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyBase64);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            
+            Signature signature = Signature.getInstance("SM3withSM2", "BC");
+            signature.initSign(privateKey);
+            signature.update(content.getBytes(StandardCharsets.UTF_8));
+            byte[] signatureValue = signature.sign();
+            
+            return Base64.getEncoder().encodeToString(signatureValue);
+        } catch (Exception e) {
+            throw new RuntimeException("SM2签名失败", e);
+        }
+    }
+
+    /**
+     * 使用SM2公钥验证数字签名
+     * 
+     * @param content 原始内容
+     * @param signatureBase64 签名值（Base64编码）
+     * @param publicKeyBase64 SM2公钥（Base64编码）
+     * @return 验证结果，true表示验证通过
+     * @throws RuntimeException 如果验证失败
+     */
+    public static boolean winterSm2Verify(String content, String signatureBase64, String publicKeyBase64) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            byte[] keyBytes = Base64.getDecoder().decode(publicKeyBase64);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+            
+            Signature signature = Signature.getInstance("SM3withSM2", "BC");
+            signature.initVerify(publicKey);
+            signature.update(content.getBytes(StandardCharsets.UTF_8));
+            
+            return signature.verify(Base64.getDecoder().decode(signatureBase64));
+        } catch (Exception e) {
+            throw new RuntimeException("SM2验签失败", e);
+        }
+    }
+
+    /**
+     * 计算SM3哈希值
+     * 
+     * @param content 待哈希内容
+     * @return SM3哈希值（16进制字符串）
+     */
+    public static String winterSm3Hex(String content) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            MessageDigest digest = MessageDigest.getInstance("SM3", "BC");
+            byte[] hashBytes = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+            
+            // 转换为16进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString().toUpperCase();
+        } catch (Exception e) {
+            throw new RuntimeException("SM3哈希计算失败", e);
+        }
+    }
+
+    /**
+     * 生成SM4密钥
+     * 
+     * @return SM4密钥（16进制字符串，32位）
+     */
+    public static String winterGenerateSm4Key() {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            KeyGenerator keyGen = KeyGenerator.getInstance("SM4", "BC");
+            keyGen.init(128, new SecureRandom());
+            SecretKey secretKey = keyGen.generateKey();
+            
+            byte[] keyBytes = secretKey.getEncoded();
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : keyBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString().toLowerCase();
+        } catch (Exception e) {
+            throw new RuntimeException("生成SM4密钥失败", e);
+        }
+    }
+
+    /**
+     * 使用SM4算法加密数据（ECB模式），返回16进制字符串
+     * 
+     * @param keyHex SM4密钥（16进制字符串）
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws RuntimeException 如果加密失败
+     */
+    public static String winterSm4EncryptEcbHex(String keyHex, String content) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            // 将16进制密钥转换为字节数组
+            byte[] keyBytes = hexStringToByteArray(keyHex);
+            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "SM4");
+            
+            Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5Padding", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+            
+            // 转换为16进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encrypted) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString().toLowerCase();
+        } catch (Exception e) {
+            throw new RuntimeException("SM4加密失败", e);
+        }
+    }
+
+    /**
+     * 使用SM4算法解密16进制字符串（ECB模式）
+     * 
+     * @param keyHex SM4密钥（16进制字符串）
+     * @param encryptHex 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws RuntimeException 如果解密失败
+     */
+    public static String winterSm4DecryptEcbStr(String keyHex, String encryptHex) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            // 将16进制密钥转换为字节数组
+            byte[] keyBytes = hexStringToByteArray(keyHex);
+            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "SM4");
+            
+            // 将16进制密文转换为字节数组
+            byte[] encryptedBytes = hexStringToByteArray(encryptHex);
+            
+            Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5Padding", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            byte[] decrypted = cipher.doFinal(encryptedBytes);
+            
+            return new String(decrypted, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("SM4解密失败", e);
+        }
+    }
+
+    /**
+     * 使用SM4算法加密数据（CBC模式），返回16进制字符串
+     * 
+     * @param keyHex SM4密钥（16进制字符串）
+     * @param ivHex 初始化向量（16进制字符串，32位）
+     * @param content 待加密内容
+     * @return 加密后的16进制字符串
+     * @throws RuntimeException 如果加密失败
+     */
+    public static String winterSm4EncryptCbcHex(String keyHex, String ivHex, String content) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            // 将16进制密钥和IV转换为字节数组
+            byte[] keyBytes = hexStringToByteArray(keyHex);
+            byte[] ivBytes = hexStringToByteArray(ivHex);
+            
+            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "SM4");
+            IvParameterSpec iv = new IvParameterSpec(ivBytes);
+            
+            Cipher cipher = Cipher.getInstance("SM4/CBC/PKCS5Padding", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
+            byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+            
+            // 转换为16进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encrypted) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString().toLowerCase();
+        } catch (Exception e) {
+            throw new RuntimeException("SM4加密失败", e);
+        }
+    }
+
+    /**
+     * 使用SM4算法解密16进制字符串（CBC模式）
+     * 
+     * @param keyHex SM4密钥（16进制字符串）
+     * @param ivHex 初始化向量（16进制字符串，32位）
+     * @param encryptHex 加密后的16进制字符串
+     * @return 解密后的原文
+     * @throws RuntimeException 如果解密失败
+     */
+    public static String winterSm4DecryptCbcStr(String keyHex, String ivHex, String encryptHex) {
+        try {
+            BouncyCastleProvider provider = new BouncyCastleProvider();
+            Security.addProvider(provider);
+            
+            // 将16进制密钥、IV和密文转换为字节数组
+            byte[] keyBytes = hexStringToByteArray(keyHex);
+            byte[] ivBytes = hexStringToByteArray(ivHex);
+            byte[] encryptedBytes = hexStringToByteArray(encryptHex);
+            
+            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "SM4");
+            IvParameterSpec iv = new IvParameterSpec(ivBytes);
+            
+            Cipher cipher = Cipher.getInstance("SM4/CBC/PKCS5Padding", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+            byte[] decrypted = cipher.doFinal(encryptedBytes);
+            
+            return new String(decrypted, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("SM4解密失败", e);
+        }
+    }
+
+    /**
+     * 将16进制字符串转换为字节数组
+     * 
+     * @param hexString 16进制字符串
+     * @return 字节数组
+     */
+    private static byte[] hexStringToByteArray(String hexString) {
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    + Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return data;
     }
 }
