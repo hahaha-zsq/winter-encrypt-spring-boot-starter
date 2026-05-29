@@ -9,6 +9,7 @@ import com.zsq.winter.encrypt.service.CryptoService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 抽象集合加密解密策略基类
@@ -120,7 +121,7 @@ public abstract class AbstractCollectionCryptoStrategy implements CollectionCryp
             
             // RSA加密特有的优化：检查数据长度
             if (stringValue.length() > 117) { // RSA-1024的最大加密长度约为117字节
-                log.warn("RSA加密数据长度较长: {} 字符，可能影响性能", stringValue.length());
+                log.warn("RSA加密数据长度较长: {} 字符，可能影响性能", Optional.of(stringValue.length()));
             }
             
             return cryptoService.encryptRsa(stringValue, privateKey, publicKey);

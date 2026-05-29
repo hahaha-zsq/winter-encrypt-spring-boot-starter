@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winter-Encrypt — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400..700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000000;
+      --surface: #111111;
+      --surface-raised: #1A1A1A;
+      --border: #222222;
+      --border-visible: #333333;
+      --text-disabled: #666666;
+      --text-secondary: #999999;
+      --text-primary: #E8E8E8;
+      --text-display: #FFFFFF;
+      --accent: #D71921;
+      --accent-subtle: rgba(215,25,33,0.15);
+      --success: #4A9E5C;
+      --success-subtle: rgba(74,158,92,0.15);
+      --warning: #D4A843;
+      --warning-subtle: rgba(212,168,67,0.12);
+      --interactive: #5B9BF6;
+      --interactive-subtle: rgba(91,155,246,0.12);
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+      --space-4xl: 96px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container { max-width: 1040px; margin: 0 auto; padding: 0 var(--space-lg); }
+
+    .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .icon-sm { width: 16px; height: 16px; }
+    .icon-md { width: 20px; height: 20px; }
+    .icon-lg { width: 24px; height: 24px; }
+    .icon-xl { width: 28px; height: 28px; }
+
+    header {
+      padding: var(--space-4xl) 0 var(--space-3xl);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
+      background-size: 16px 16px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-family: "Doto", "Space Mono", monospace;
+      font-weight: 700;
+      font-size: 72px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--text-display);
+      position: relative;
+    }
+
+    .hero-tagline {
+      margin-top: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      position: relative;
+    }
+
+    .hero-tagline svg { color: var(--accent); }
+
+    .hero-sub {
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 1.3;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .hero-meta {
+      margin-top: var(--space-md);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      position: relative;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .hero-meta-item svg { color: var(--text-disabled); }
+
+    .hero-links {
+      margin-top: var(--space-lg);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      position: relative;
+    }
+
+    .hero-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 6px 16px;
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--border-visible);
+      color: var(--text-secondary);
+      transition: color 150ms ease-out, border-color 150ms ease-out;
+    }
+
+    .hero-links a:hover {
+      color: var(--text-display);
+      border-color: var(--text-secondary);
+    }
+
+    .hero-links a:hover svg { color: var(--text-display); }
+
+    .hero-links .link-accent {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .hero-links .link-accent:hover { background: var(--accent-subtle); }
+    .hero-links .link-accent svg { color: var(--accent); }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--black);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    nav li { flex-shrink: 0; }
+
+    nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 6px 14px;
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 150ms ease-out;
+      white-space: nowrap;
+    }
+
+    nav a svg { color: var(--text-disabled); transition: color 150ms ease-out; }
+
+    nav a:hover { color: var(--text-primary); }
+    nav a:hover svg { color: var(--text-secondary); }
+
+    main { padding: var(--space-3xl) 0 var(--space-4xl); }
+
+    section { margin-bottom: var(--space-3xl); }
+    section:last-child { margin-bottom: 0; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .section-header svg { color: var(--text-disabled); }
+
+    .section-label {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-title {
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: var(--text-display);
+      margin-bottom: var(--space-md);
+    }
+
+    .section-body {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      max-width: 720px;
+    }
+
+    .section-body p { margin-bottom: var(--space-md); }
+    .section-body p:last-child { margin-bottom: 0; }
+
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 4px 12px;
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-visible);
+      border-radius: 999px;
+    }
+
+    .tag svg { color: var(--text-disabled); }
+
+    .tag-accent { color: var(--accent); border-color: var(--accent); }
+    .tag-accent svg { color: var(--accent); }
+    .tag-success { color: var(--success); border-color: rgba(74,158,92,0.3); }
+    .tag-success svg { color: var(--success); }
+    .tag-warning { color: var(--warning); border-color: rgba(212,168,67,0.3); }
+    .tag-warning svg { color: var(--warning); }
+    .tag-interactive { color: var(--interactive); border-color: rgba(91,155,246,0.3); }
+    .tag-interactive svg { color: var(--interactive); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+
+    .card {
+      background: var(--surface);
+      padding: var(--space-lg);
+      border: 1px solid var(--border);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .card-head svg { color: var(--text-disabled); }
+
+    .card-title {
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--text-display);
+    }
+
+    .card-desc {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .card ul {
+      list-style: none;
+      margin-top: var(--space-sm);
+    }
+
+    .card li {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-sm);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .card li svg {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+      color: var(--text-disabled);
+      margin-top: 3px;
+    }
+
+    .code-block {
+      background: var(--surface-raised);
+      padding: var(--space-lg);
+      border: 1px solid var(--border);
+      margin-top: var(--space-lg);
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      white-space: pre;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-header svg { color: var(--text-disabled); }
+
+    .code-header span {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-disabled);
+    }
+
+    .code-header .code-tag {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .note-list {
+      list-style: none;
+      margin-top: var(--space-lg);
+    }
+
+    .note-list li {
+      position: relative;
+      display: flex;
+      gap: var(--space-md);
+      padding-left: var(--space-lg);
+      padding-bottom: var(--space-md);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      border-left: 1px solid var(--border);
+    }
+
+    .note-list li:last-child { padding-bottom: 0; }
+
+    .note-list li::before {
+      content: '';
+      position: absolute;
+      left: -3px;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+    }
+
+    .note-list li.important::before { background: var(--accent); }
+    .note-list li.important { color: var(--text-display); }
+
+    .note-bullet {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      margin-top: 3px;
+    }
+
+    .note-bullet svg { width: 14px; height: 14px; color: var(--text-disabled); }
+    .note-list li.important .note-bullet svg { color: var(--accent); }
+
+    .note-body { flex: 1; }
+
+    .note-label {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .step-group { margin-top: var(--space-lg); }
+
+    .step {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-display);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-visible);
+    }
+
+    .step-content { flex: 1; }
+
+    .step-content .step-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--text-display);
+      margin-bottom: 2px;
+    }
+
+    .step-content .step-title svg { color: var(--text-disabled); }
+
+    .step-content .step-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: var(--space-lg);
+      font-size: 13px;
+    }
+
+    thead th {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border);
+      font-weight: 400;
+    }
+
+    tbody td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody td:first-child {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    tbody td:nth-child(2) {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .release-list { margin-top: var(--space-lg); }
+
+    .release-item {
+      display: flex;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .release-item:last-child { border-bottom: none; }
+
+    .release-version {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-display);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .release-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .release-desc strong { color: var(--text-primary); font-weight: 500; }
+    .release-desc .inline-code { font-size: 12px; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: var(--space-xl) 0;
+    }
+
+    .footer-text {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-disabled);
+    }
+
+    .footer-text a { color: var(--interactive); text-decoration: none; }
+    .footer-text a:hover { text-decoration: underline; }
+
+    .footer-links {
+      margin-top: var(--space-sm);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+
+    .footer-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-disabled);
+      transition: color 150ms ease-out;
+    }
+
+    .footer-links a svg { color: var(--text-disabled); transition: color 150ms ease-out; }
+    .footer-links a:hover { color: var(--text-primary); }
+    .footer-links a:hover svg { color: var(--text-secondary); }
+
+    .inline-code {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--surface);
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+    }
+
+    .mt-lg { margin-top: var(--space-lg); }
+    .mt-xl { margin-top: var(--space-xl); }
+    .mt-2xl { margin-top: var(--space-2xl); }
+    .mb-lg { margin-bottom: var(--space-lg); }
+    .mb-xl { margin-bottom: var(--space-xl); }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color 150ms ease-out;
+    }
+
+    .toc-item:hover { border-color: var(--border-visible); }
+
+    .toc-item svg {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      color: var(--text-disabled);
+      margin-top: 1px;
+    }
+
+    .toc-num {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--text-disabled);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .toc-title {
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--text-display);
+    }
+
+    .toc-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ===== ARCHITECTURE DIAGRAM ===== */
+    .arch-diagram {
+      margin-top: var(--space-xl);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: var(--space-lg);
+      overflow-x: auto;
+    }
+
+    .arch-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .arch-title svg { color: var(--text-disabled); }
+
+    .arch-canvas {
+      position: relative;
+      min-width: 800px;
+      padding: 0 0 var(--space-lg);
+    }
+
+    .arch-zone {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .arch-zone-label {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      padding: 2px 10px;
+      border: 1px solid var(--border);
+    }
+
+    .arch-zone-label.decrypt { border-color: rgba(215,25,33,0.3); color: rgba(215,25,33,0.7); }
+    .arch-zone-label.encrypt { border-color: rgba(91,155,246,0.3); color: rgba(91,155,246,0.7); }
+
+    .arch-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+      position: relative;
+      min-height: 44px;
+    }
+
+    .arch-row.flow-top { justify-content: space-between; }
+
+    .arch-row.middle { margin-bottom: var(--space-md); }
+
+    .arch-node {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 8px 18px;
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.03em;
+      color: var(--text-primary);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-visible);
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .arch-node svg { width: 14px; height: 14px; color: var(--text-disabled); }
+
+    .arch-node.highlight {
+      background: var(--black);
+      border-width: 2px;
+      font-weight: 700;
+      font-size: 12px;
+      font-family: "Space Grotesk", system-ui, sans-serif;
+    }
+
+    .arch-node.highlight.blue { border-color: var(--interactive); }
+    .arch-node.highlight.blue svg { color: var(--interactive); }
+
+    .arch-node.accent { border-color: var(--accent); color: var(--accent); }
+    .arch-node.accent svg { color: var(--accent); }
+    .arch-node.green { border-color: var(--success); color: var(--success); }
+    .arch-node.green svg { color: var(--success); }
+    .arch-node.gold { border-color: var(--warning); color: var(--warning); }
+    .arch-node.gold svg { color: var(--warning); }
+
+    .arch-node.small {
+      padding: 4px 12px;
+      font-size: 9px;
+    }
+
+    .arch-arrow-v {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 0;
+    }
+
+    .arch-arrow-v svg {
+      width: 14px;
+      height: 14px;
+      color: var(--text-disabled);
+    }
+
+    .arch-arrow-h {
+      display: flex;
+      align-items: center;
+    }
+
+    .arch-arrow-h svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-disabled);
+    }
+
+    .arch-branch {
+      display: flex;
+      gap: var(--space-xl);
+      justify-content: center;
+      padding: var(--space-sm) 0;
+    }
+
+    .arch-branch-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .arch-branch-label {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+    }
+
+    .arch-strategy-group {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .arch-subtitle {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 8px;
+      letter-spacing: 0.06em;
+      color: var(--text-disabled);
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .arch-bottom {
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--border);
+    }
+
+    .feature-matrix {
+      display: grid;
+      grid-template-columns: 140px 1fr 1fr 1fr 1fr;
+      gap: 0;
+      margin-top: var(--space-lg);
+      border: 1px solid var(--border);
+    }
+
+    .matrix-cell {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 12px;
+      line-height: 1.4;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .matrix-cell:last-child { border-right: none; }
+
+    .matrix-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      background: var(--surface);
+    }
+
+    .matrix-header svg { width: 12px; height: 12px; }
+
+    .matrix-label {
+      font-family: "Space Mono", "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .matrix-yes { color: var(--success); }
+    .matrix-no { color: var(--text-disabled); }
+    .matrix-partial { color: var(--warning); }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 48px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .toc-grid { grid-template-columns: 1fr; }
+      header { padding: var(--space-3xl) 0 var(--space-2xl); }
+      .container { padding: 0 var(--space-md); }
+      .feature-matrix { overflow-x: auto; }
+      .arch-zone { flex-direction: column; gap: var(--space-sm); }
+      .arch-row.flow-top { flex-direction: column; align-items: center; }
+      .arch-branch { flex-direction: column; align-items: center; }
+    }
+
+      @media (max-width: 480px) {
+        .hero-title { font-size: 36px; }
+      }
+
+      .arch-diagram { cursor: pointer; }
+
+      .lightbox-overlay {
+        position: fixed; inset: 0; z-index: 100;
+        background: rgba(0,0,0,0.92);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none;
+        transition: opacity 250ms ease-out;
+        padding: var(--space-lg);
+      }
+      .lightbox-overlay.active { opacity: 1; pointer-events: all; }
+      .lightbox-content {
+        max-width: 1200px; max-height: 90vh; width: 100%;
+        overflow: auto;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        padding: var(--space-lg);
+        transform: scale(0.95);
+        transition: transform 250ms ease-out;
+      }
+      .lightbox-overlay.active .lightbox-content { transform: scale(1); }
+      .lightbox-close {
+        position: fixed; top: var(--space-lg); right: var(--space-lg);
+        width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid var(--border-visible);
+        background: var(--surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 22px;
+        transition: color 150ms, border-color 150ms;
+      }
+      .lightbox-close:hover { color: var(--text-display); border-color: var(--text-secondary); }
+
+      .search-overlay {
+        position: fixed; inset: 0; z-index: 200;
+        background: rgba(0,0,0,0.92);
+        display: flex; flex-direction: column; align-items: center;
+        padding: 15vh var(--space-lg) var(--space-lg);
+        opacity: 0; pointer-events: none;
+        transition: opacity 200ms ease-out;
+      }
+      .search-overlay.active { opacity: 1; pointer-events: all; }
+      .search-input-wrap {
+        width: 100%; max-width: 600px; position: relative;
+      }
+      .search-input-wrap .search-icon {
+        position: absolute; left: 16px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-disabled);
+      }
+      .search-input {
+        width: 100%;
+        padding: 14px 80px 14px 48px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-visible);
+        color: var(--text-display);
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 16px;
+        outline: none;
+      }
+      .search-input::placeholder { color: var(--text-disabled); }
+      .search-input:focus { border-color: var(--text-secondary); }
+      .search-shortcut {
+        position: absolute; right: 14px; top: 50%;
+        transform: translateY(-50%);
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        color: var(--text-disabled);
+        letter-spacing: 0.04em;
+        border: 1px solid var(--border);
+        padding: 2px 6px;
+      }
+      .search-results {
+        width: 100%; max-width: 600px;
+        margin-top: var(--space-sm);
+        max-height: 50vh; overflow-y: auto;
+      }
+      .search-result-item {
+        display: flex; align-items: center; gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        border: 1px solid var(--border);
+        margin-bottom: 2px;
+        text-decoration: none; cursor: pointer;
+        transition: border-color 150ms;
+        background: var(--surface);
+      }
+      .search-result-item:hover,
+      .search-result-item.selected {
+        border-color: var(--text-secondary);
+        background: var(--surface-raised);
+      }
+      .search-result-item svg {
+        width: 16px; height: 16px; color: var(--text-disabled); flex-shrink: 0;
+      }
+      .search-result-title { font-size: 14px; color: var(--text-display); }
+      .search-result-desc { font-size: 12px; color: var(--text-disabled); margin-top: 1px; }
+      .search-empty {
+        text-align: center; padding: var(--space-xl);
+        color: var(--text-disabled); font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .search-overlay { padding: 10vh var(--space-md) var(--space-md); }
+      }
+    </style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+  </symbol>
+  <symbol id="icon-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.83-1"/>
+  </symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <symbol id="icon-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>
+  </symbol>
+  <symbol id="icon-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+  </symbol>
+  <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+  </symbol>
+  <symbol id="icon-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </symbol>
+  <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+  </symbol>
+  <symbol id="icon-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+  </symbol>
+  <symbol id="icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+  </symbol>
+  <symbol id="icon-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+  </symbol>
+  <symbol id="icon-github" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  </symbol>
+  <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+  </symbol>
+  <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+  </symbol>
+  <symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16.5 9.4L7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+  </symbol>
+  <symbol id="icon-annotation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+  </symbol>
+  <symbol id="icon-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </symbol>
+  <symbol id="icon-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+  </symbol>
+  <symbol id="icon-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="2"/>
+  </symbol>
+  <symbol id="icon-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>
+  </symbol>
+</svg>
+
+<header>
+  <div class="container">
+    <div class="hero-title">WINTER-ENCRYPT</div>
+    <div class="hero-tagline">
+      <svg class="icon-lg"><use href="#icon-shield"/></svg>
+      <span class="hero-sub">Spring Boot 声明式加解密工具包<br>注解驱动 · 零侵入 · 开箱即用</span>
+    </div>
+    <div class="hero-meta">
+      <span class="hero-meta-item">
+        <svg class="icon-sm"><use href="#icon-box"/></svg>
+        v0.0.32
+      </span>
+      <span class="hero-meta-item">
+        <svg class="icon-sm"><use href="#icon-book"/></svg>
+        Apache 2.0
+      </span>
+      <span class="hero-meta-item">
+        <svg class="icon-sm"><use href="#icon-cpu"/></svg>
+        Java 8+
+      </span>
+      <span class="hero-meta-item">
+        <svg class="icon-sm"><use href="#icon-rocket"/></svg>
+        Spring Boot 2.6.11
+      </span>
+    </div>
+    <div class="hero-links">
+      <a href="https://central.sonatype.com/artifact/io.github.hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank" class="link-accent">
+        <svg class="icon-md"><use href="#icon-box"/></svg>Maven Central
+      </a>
+      <a href="https://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank">
+        <svg class="icon-md"><use href="#icon-github"/></svg>GitHub
+      </a>
+      <a href="https://mvnrepository.com/artifact/io.github.hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank">
+        <svg class="icon-md"><use href="#icon-external"/></svg>MVNRepository
+      </a>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <ul>
+      <li><a href="#intro"><svg class="icon-sm"><use href="#icon-shield"/></svg>项目简介</a></li>
+      <li><a href="#tech"><svg class="icon-sm"><use href="#icon-cpu"/></svg>技术栈</a></li>
+      <li><a href="#capabilities"><svg class="icon-sm"><use href="#icon-grid"/></svg>核心能力</a></li>
+      <li><a href="#annotations"><svg class="icon-sm"><use href="#icon-annotation"/></svg>注解参考</a></li>
+      <li><a href="#config"><svg class="icon-sm"><use href="#icon-settings"/></svg>配置参考</a></li>
+      <li><a href="#architecture"><svg class="icon-sm"><use href="#icon-layers"/></svg>架构设计</a></li>
+      <li><a href="#api"><svg class="icon-sm"><use href="#icon-book"/></svg>API 参考</a></li>
+      <li><a href="#usage"><svg class="icon-sm"><use href="#icon-rocket"/></svg>使用流程</a></li>
+      <li><a href="#releases"><svg class="icon-sm"><use href="#icon-clock"/></svg>版本历史</a></li>
+      <li><a href="#notes"><svg class="icon-sm"><use href="#icon-alert"/></svg>注意事项</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+
+    <!-- ===== INTRO ===== -->
+    <section id="intro">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-shield"/></svg>
+        <div class="section-label">项目简介</div>
+      </div>
+      <div class="section-title">Declarative Crypto for Spring Boot</div>
+      <div class="section-body">
+        <p><strong>Winter-Encrypt</strong> 是一个基于 AOP（面向切面编程）的 Spring Boot 加解密工具包。通过在控制器方法的参数和返回值上添加注解，即可实现对敏感字段的自动加解密，无需编写任何加解密逻辑。</p>
+        <p>底层集成 Hutool 加密工具与 BouncyCastle 密码库，支持国际标准算法（AES、DES、RSA）和中国国家密码算法（SM2、SM3、SM4），同时支持复杂容器类型（List、Set、Map、Array）中元素级的批量处理。</p>
+        <p>自 v0.0.1 发布以来，经过 v0.0.30（新增解密能力）、v0.0.31（策略模式重构 + 容器支持）、v0.0.32（RSA 安全增强）等迭代，已形成完整的声明式加解密方案。</p>
+      </div>
+
+      <div class="toc-grid">
+        <a href="#tech" class="toc-item">
+          <svg><use href="#icon-cpu"/></svg>
+          <div>
+            <span class="toc-num">01</span>
+            <div class="toc-title">技术栈</div>
+            <div class="toc-desc">Java, Spring Boot, Hutool, BouncyCastle, Lombok</div>
+          </div>
+        </a>
+        <a href="#capabilities" class="toc-item">
+          <svg><use href="#icon-grid"/></svg>
+          <div>
+            <span class="toc-num">02</span>
+            <div class="toc-title">核心能力</div>
+            <div class="toc-desc">算法、注解、容器、工具方法完整矩阵</div>
+          </div>
+        </a>
+        <a href="#annotations" class="toc-item">
+          <svg><use href="#icon-annotation"/></svg>
+          <div>
+            <span class="toc-num">03</span>
+            <div class="toc-title">注解参考</div>
+            <div class="toc-desc">@Encrypt / @Decrypt / @FieldEncrypt / @FieldDecrypt</div>
+          </div>
+        </a>
+        <a href="#config" class="toc-item">
+          <svg><use href="#icon-settings"/></svg>
+          <div>
+            <span class="toc-num">04</span>
+            <div class="toc-title">配置参考</div>
+            <div class="toc-desc">winter-crypto.* 配置属性完整说明</div>
+          </div>
+        </a>
+        <a href="#architecture" class="toc-item">
+          <svg><use href="#icon-layers"/></svg>
+          <div>
+            <span class="toc-num">05</span>
+            <div class="toc-title">架构设计</div>
+            <div class="toc-desc">AOP 编排、策略模式、类层次结构</div>
+          </div>
+        </a>
+        <a href="#api" class="toc-item">
+          <svg><use href="#icon-book"/></svg>
+          <div>
+            <span class="toc-num">06</span>
+            <div class="toc-title">API 参考</div>
+            <div class="toc-desc">CryptoUtil 静态方法速查表</div>
+          </div>
+        </a>
+        <a href="#usage" class="toc-item">
+          <svg><use href="#icon-rocket"/></svg>
+          <div>
+            <span class="toc-num">07</span>
+            <div class="toc-title">使用流程</div>
+            <div class="toc-desc">Maven/Gradle 集成、配置、注解示例</div>
+          </div>
+        </a>
+        <a href="#releases" class="toc-item">
+          <svg><use href="#icon-clock"/></svg>
+          <div>
+            <span class="toc-num">08</span>
+            <div class="toc-title">版本历史</div>
+            <div class="toc-desc">从 v0.0.1 到 v0.0.32 的演进历程</div>
+          </div>
+        </a>
+        <a href="#notes" class="toc-item">
+          <svg><use href="#icon-alert"/></svg>
+          <div>
+            <span class="toc-num">09</span>
+            <div class="toc-title">注意事项</div>
+            <div class="toc-desc">约束、限制、最佳实践</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="tag-group">
+        <span class="tag tag-accent"><svg class="icon-sm"><use href="#icon-flow"/></svg>AOP</span>
+        <span class="tag tag-success"><svg class="icon-sm"><use href="#icon-check"/></svg>Production Ready</span>
+        <span class="tag"><svg class="icon-sm"><use href="#icon-annotation"/></svg>Annotation-Driven</span>
+        <span class="tag"><svg class="icon-sm"><use href="#icon-settings"/></svg>Zero Config</span>
+        <span class="tag tag-interactive"><svg class="icon-sm"><use href="#icon-shield"/></svg>Thread Safe</span>
+      </div>
+    </section>
+
+    <!-- ===== TECH STACK ===== -->
+    <section id="tech">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-cpu"/></svg>
+        <div class="section-label">技术栈</div>
+      </div>
+      <div class="section-title">Technology Stack</div>
+      <div class="section-body">
+        <p>项目构建在成熟的 Java 生态之上，精选业界验证过的加密与工具库。</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-package"/></svg>依赖</th><th>版本</th><th>用途</th><th>许可证</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-cpu"/></svg>Java</td><td>1.8+</td><td>核心开发语言，源码与目标级别兼容 Java 8</td><td>—</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-rocket"/></svg>Spring Boot</td><td>2.6.11</td><td>自动配置、AOP 切面、Web 支持、条件化加载</td><td>Apache 2.0</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-box"/></svg>Hutool</td><td>5.8.25</td><td>加密原语（hutool-crypto）、JSON（hutool-json）、核心工具（hutool-core）</td><td>Apache 2.0</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-shield"/></svg>BouncyCastle</td><td>1.81</td><td>RSA、SM2/SM3/SM4 国密（bcprov-jdk15to18 + bcpkix-jdk15to18）</td><td>MIT</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-code"/></svg>Lombok</td><td>1.18.22</td><td>减少样板代码：@Data / @Slf4j / @AllArgsConstructor</td><td>MIT</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-check"/></svg>JUnit 5</td><td>5.9.2</td><td>单元测试框架</td><td>EPL 2.0</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-package"/></svg>Maven</td><td>—</td><td>构建管理、Maven Central 自动发布</td><td>Apache 2.0</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body mt-xl">
+        <p><strong>Maven Central 坐标：</strong></p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-box"/></svg>
+          <span>pom.xml</span>
+          <span class="code-tag"><svg class="icon-sm"><use href="#icon-external"/></svg>io.github.hahaha-zsq</span>
+        </div>
+        <code>&lt;dependency&gt;
+    &lt;groupId&gt;io.github.hahaha-zsq&lt;/groupId&gt;
+    &lt;artifactId&gt;winter-encrypt-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;0.0.32&lt;/version&gt;
+&lt;/dependency&gt;</code>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-code"/></svg>
+          <span>Gradle (build.gradle.kts)</span>
+        </div>
+        <code>implementation("io.github.hahaha-zsq:winter-encrypt-spring-boot-starter:0.0.32")</code>
+      </div>
+    </section>
+
+    <!-- ===== CORE CAPABILITIES ===== -->
+    <section id="capabilities">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-grid"/></svg>
+        <div class="section-label">核心能力</div>
+      </div>
+      <div class="section-title">Core Capabilities</div>
+
+      <div class="section-body mb-lg">
+        <p>覆盖从对称加密到国密算法的完整加解密能力，配合灵活的注解系统实现零代码侵入。</p>
+      </div>
+
+      <div class="section-title" style="font-size:18px">
+        <svg class="icon-md" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-grid"/></svg>
+        算法支持矩阵
+      </div>
+
+      <div class="feature-matrix">
+        <div class="matrix-cell matrix-header"><svg><use href="#icon-layers"/></svg>功能</div>
+        <div class="matrix-cell matrix-header">AES</div>
+        <div class="matrix-cell matrix-header">DES</div>
+        <div class="matrix-cell matrix-header">RSA</div>
+        <div class="matrix-cell matrix-header">SM2/3/4</div>
+
+        <div class="matrix-cell matrix-label">加密 / 解密</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+
+        <div class="matrix-cell matrix-label">密钥生成</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+        <div class="matrix-cell matrix-partial">固定密钥</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>✓</div>
+
+        <div class="matrix-cell matrix-label">多模式</div>
+        <div class="matrix-cell matrix-yes">ECB/CBC/CFB/OFB/CTR</div>
+        <div class="matrix-cell matrix-yes">ECB/CBC/CFB/OFB/CTR</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-partial">ECB/CBC</div>
+
+        <div class="matrix-cell matrix-label">多填充</div>
+        <div class="matrix-cell matrix-yes">PKCS5/No/ISO10126</div>
+        <div class="matrix-cell matrix-yes">PKCS5/No/ISO10126</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-no">—</div>
+
+        <div class="matrix-cell matrix-label">数字签名</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-partial">内部使用</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>SM2</div>
+
+        <div class="matrix-cell matrix-label">哈希</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-no">—</div>
+        <div class="matrix-cell matrix-yes"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>SM3</div>
+      </div>
+
+      <div class="section-title mt-2xl" style="font-size:18px">
+        <svg class="icon-md" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-box"/></svg>
+        能力详情
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-lock"/></svg>
+            <div class="card-title">AES 对称加密</div>
+          </div>
+          <div class="card-desc">高级加密标准，支持 128/192/256 位密钥。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>五种模式：ECB, CBC, CFB, OFB, CTR</li>
+            <li><svg><use href="#icon-dot"/></svg>三种填充：PKCS5Padding, NoPadding, ISO10126Padding</li>
+            <li><svg><use href="#icon-dot"/></svg>密钥长度：16 / 24 / 32 字节</li>
+            <li><svg><use href="#icon-dot"/></svg>IV 长度：16 字节（支持 auto-adjust）</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-lock"/></svg>
+            <div class="card-title">DES 对称加密</div>
+          </div>
+          <div class="card-desc">数据加密标准，64 位密钥，适合向后兼容场景。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>五种模式：ECB, CBC, CFB, OFB, CTR</li>
+            <li><svg><use href="#icon-dot"/></svg>三种填充：PKCS5Padding, NoPadding, ISO10126Padding</li>
+            <li><svg><use href="#icon-dot"/></svg>密钥长度：8 字节（64 位）</li>
+            <li><svg><use href="#icon-dot"/></svg>IV 长度：8 字节（支持 auto-adjust）</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-unlock"/></svg>
+            <div class="card-title">RSA 非对称加密</div>
+          </div>
+          <div class="card-desc">Rivest-Shamir-Adleman 算法，适用于密钥分发。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>算法：RSA/ECB/PKCS1Padding</li>
+            <li><svg><use href="#icon-dot"/></svg>私钥格式：PKCS#8 Base64（无 PEM 头）</li>
+            <li><svg><use href="#icon-dot"/></svg>公钥格式：X.509 Base64（无 PEM 头）</li>
+            <li><svg><use href="#icon-dot"/></svg>RSA-1024 最大加密 ~117 字节</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-shield"/></svg>
+            <div class="card-title">SM2 / SM3 / SM4 国密</div>
+          </div>
+          <div class="card-desc">中国国家密码标准算法实现。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>SM2：椭圆曲线加解密 + 签名验签</li>
+            <li><svg><use href="#icon-dot"/></svg>SM3：密码杂凑（类似 SHA-256）</li>
+            <li><svg><use href="#icon-dot"/></svg>SM4：分组加密，ECB + CBC 模式</li>
+            <li><svg><use href="#icon-dot"/></svg>基于 BouncyCastle 实现</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-annotation"/></svg>
+            <div class="card-title">注解驱动加解密</div>
+          </div>
+          <div class="card-desc">声明式编程，零侵入集成。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>@Encrypt：拦截返回值加密</li>
+            <li><svg><use href="#icon-dot"/></svg>@Decrypt：拦截请求参数解密</li>
+            <li><svg><use href="#icon-dot"/></svg>@FieldEncrypt：标记待加密字段</li>
+            <li><svg><use href="#icon-dot"/></svg>@FieldDecrypt：标记待解密字段</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-layers"/></svg>
+            <div class="card-title">容器批量处理</div>
+          </div>
+          <div class="card-desc">集合与数组元素级自动处理。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>List&lt;String&gt; / Set&lt;String&gt; 自动遍历</li>
+            <li><svg><use href="#icon-dot"/></svg>Map&lt;String,String&gt; 仅加密 value</li>
+            <li><svg><use href="#icon-dot"/></svg>String[] 数组逐元素处理</li>
+            <li><svg><use href="#icon-dot"/></svg>&gt;50 元素自动 Stream 并行</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-book"/></svg>
+            <div class="card-title">静态工具 CryptoUtil</div>
+          </div>
+          <div class="card-desc">20+ 静态方法，直接调用。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>AES / DES / RSA / SM2/SM3/SM4</li>
+            <li><svg><use href="#icon-dot"/></svg>凯撒密码（winterEncryptKaiser）</li>
+            <li><svg><use href="#icon-dot"/></svg>MD5 / SHA1 哈希</li>
+            <li><svg><use href="#icon-dot"/></svg>密钥生成工具方法</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon-lg"><use href="#icon-settings"/></svg>
+            <div class="card-title">Key/IV 自动适配</div>
+          </div>
+          <div class="card-desc">智能修正密钥与向量长度。</div>
+          <ul>
+            <li><svg><use href="#icon-dot"/></svg>auto-adjust-iv 配置开关</li>
+            <li><svg><use href="#icon-dot"/></svg>开启后自动截断或补零</li>
+            <li><svg><use href="#icon-dot"/></svg>关闭则严格校验长度</li>
+            <li><svg><use href="#icon-dot"/></svg>CryptoValidator 集中管理</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ANNOTATIONS ===== -->
+    <section id="annotations">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-annotation"/></svg>
+        <div class="section-label">注解参考</div>
+      </div>
+      <div class="section-title">Annotation Reference</div>
+      <div class="section-body">
+        <p>四个核心注解构成完整的声明式加解密体系。方法级注解控制加解密时机，字段级注解标记目标字段并配置算法参数。</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>注解</th><th>目标</th><th>属性</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--accent)"><use href="#icon-lock"/></svg>@Encrypt</td><td>Method</td><td>—</td><td>标注在 Controller 方法上，方法执行后自动加密返回值中所有带 @FieldEncrypt 的字段</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--interactive)"><use href="#icon-unlock"/></svg>@Decrypt</td><td>Method</td><td>—</td><td>标注在 Controller 方法上，方法执行前自动解密请求参数中所有带 @FieldDecrypt 的字段</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--warning)"><use href="#icon-annotation"/></svg>@FieldEncrypt</td><td>Field</td><td>cryptoType, mode, padding</td><td>标记在 VO/DTO 的 String 字段上，指定加密算法与参数。支持容器类型字段（List/Set/Map/String[]）</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--success)"><use href="#icon-annotation"/></svg>@FieldDecrypt</td><td>Field</td><td>cryptoType, mode, padding</td><td>标记在 VO/DTO 的 String 字段上，指定解密算法与参数。支持容器类型字段</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body mt-xl">
+        <p><strong>@FieldEncrypt / @FieldDecrypt 属性详情</strong></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>属性</th><th>类型</th><th>默认值</th><th>可选值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>cryptoType</td><td>CryptoType</td><td>CryptoType.AES</td><td>AES, DES, RSA</td></tr>
+          <tr><td>mode</td><td>Mode (Hutool)</td><td>Mode.CBC</td><td>ECB, CBC, CFB, OFB, CTR</td></tr>
+          <tr><td>padding</td><td>Padding (Hutool)</td><td>Padding.PKCS5Padding</td><td>PKCS5Padding, NoPadding, ISO10126Padding</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body mt-xl">
+        <p><strong>使用示例：</strong></p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-code"/></svg>
+          <span>注解组合示例</span>
+        </div>
+        <code>// 响应加密 — AES-CBC 模式
+@Encrypt
+@GetMapping("/user/{id}")
+public UserVO getUser(@PathVariable Long id) { ... }
+
+// 请求解密 — RSA 非对称
+@Decrypt
+@PostMapping("/secure-payload")
+public Result handleSecure(@RequestBody SecureDTO dto) { ... }
+
+// 字段级：AES + ECB 模式 + 无填充
+@FieldEncrypt(cryptoType = CryptoType.AES, mode = Mode.ECB, padding = Padding.NoPadding)
+private String cardNumber;
+
+// 字段级：RSA 加密
+@FieldEncrypt(cryptoType = CryptoType.RSA)
+private String ssn;
+
+// 字段级：List 容器 AES 加密
+@FieldEncrypt(cryptoType = CryptoType.AES)
+private List&lt;String&gt; phoneNumbers;
+
+// 解密字段：DES + CFB 模式
+@FieldDecrypt(cryptoType = CryptoType.DES, mode = Mode.CFB)
+private String secretKey;</code>
+      </div>
+    </section>
+
+    <!-- ===== CONFIG REFERENCE ===== -->
+    <section id="config">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-settings"/></svg>
+        <div class="section-label">配置参考</div>
+      </div>
+      <div class="section-title">Configuration Reference</div>
+      <div class="section-body">
+        <p>所有配置前缀为 <span class="inline-code">winter-crypto</span>。仅 <span class="inline-code">aes.key</span> 和 <span class="inline-code">aes.iv</span> 为必配项，缺一不可 — 缺少任意一项将导致整个自动配置被跳过。</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>属性</th><th>类型</th><th>默认值</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>aes.key</td><td>String</td><td>—</td><td>AES 密钥，16/24/32 字节十六进制字符串</td></tr>
+          <tr><td>aes.iv</td><td>String</td><td>—</td><td>AES 初始化向量，16 字节字符串</td></tr>
+          <tr><td>aes.auto-adjust-iv</td><td>Boolean</td><td>true</td><td>自动调整 IV 长度（截断或补零至 16 字节）</td></tr>
+          <tr><td>des.key</td><td>String</td><td>—</td><td>DES 密钥，8 字节字符串（可选）</td></tr>
+          <tr><td>des.iv</td><td>String</td><td>—</td><td>DES 初始化向量，8 字节字符串（可选）</td></tr>
+          <tr><td>des.auto-adjust-iv</td><td>Boolean</td><td>true</td><td>自动调整 DES IV 长度至 8 字节</td></tr>
+          <tr><td>rsa.private-key</td><td>String</td><td>—</td><td>RSA 私钥，PKCS#8 格式 Base64 编码（可选）</td></tr>
+          <tr><td>rsa.public-key</td><td>String</td><td>—</td><td>RSA 公钥，X.509 格式 Base64 编码（可选）</td></tr>
+          <tr><td>is-print</td><td>Boolean</td><td>true</td><td>是否在启动时打印 Winter ASCII 横幅</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body mt-xl">
+        <p><strong>完整配置示例：</strong></p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-settings"/></svg>
+          <span>application.yml</span>
+        </div>
+        <code>winter-crypto:
+  aes:
+    key: 346a3f9f4c1988cb7a507cc177923ac7
+    iv: 1234567887654321
+    auto-adjust-iv: true
+  des:
+    key: 12345678
+    iv: 87654321
+    auto-adjust-iv: true
+  rsa:
+    private-key: "${RSA_PRIVATE_KEY}"
+    public-key: "${RSA_PUBLIC_KEY}"
+  is-print: true</code>
+      </div>
+
+      <div class="section-body mt-lg">
+        <p><strong>安全检查：</strong>生产环境务必使用环境变量注入密钥，禁止硬编码。示例中的 <span class="inline-code">${RSA_PRIVATE_KEY}</span> 将在运行时从环境变量读取。</p>
+      </div>
+    </section>
+
+    <!-- ===== ARCHITECTURE ===== -->
+    <section id="architecture">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-layers"/></svg>
+        <div class="section-label">架构设计</div>
+      </div>
+      <div class="section-title">Architecture</div>
+      <div class="section-body">
+        <p>基于 Spring AOP 的环绕通知（<span class="inline-code">@Around</span>）实现声明式加解密。核心架构分为三层：请求拦截层、字段调度层、加密执行层。</p>
+      </div>
+
+      <!-- ARCHITECTURE DIAGRAM -->
+      <div class="arch-diagram">
+        <div class="arch-title">
+          <svg class="icon-md"><use href="#icon-layers"/></svg>
+          Encryption / Decryption Flow
+        </div>
+
+        <div class="arch-canvas">
+
+          <!-- Zone labels -->
+          <div class="arch-zone">
+            <span class="arch-zone-label decrypt"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-unlock"/></svg>Decrypt Path</span>
+            <span class="arch-zone-label encrypt"><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-lock"/></svg>Encrypt Path</span>
+          </div>
+
+          <!-- Row 1: Entry points -->
+          <div class="arch-row flow-top">
+            <div class="arch-node accent">
+              <svg><use href="#icon-unlock"/></svg>
+              @Decrypt
+            </div>
+            <div class="arch-node highlight blue">
+              <svg><use href="#icon-flow"/></svg>
+              CryptoAspect (@Around)
+            </div>
+            <div class="arch-node accent">
+              <svg><use href="#icon-lock"/></svg>
+              @Encrypt
+            </div>
+          </div>
+
+          <div class="arch-row" style="justify-content:center">
+            <div class="arch-arrow-v">
+              <svg><use href="#icon-arrow-down"/></svg>
+            </div>
+          </div>
+
+          <!-- Row 2: Bootstrap side panels -->
+          <div class="arch-row" style="justify-content:space-between;min-height:auto">
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;width:120px">
+              <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.08em;color:var(--text-disabled);text-transform:uppercase">Bootstrap</span>
+              <div class="arch-node small" style="width:100%;text-align:center">spring.factories</div>
+              <div class="arch-node small" style="width:100%;text-align:center">Auto Config</div>
+              <div class="arch-node small" style="width:100%;text-align:center">CryptoProperties</div>
+              <div class="arch-node small" style="width:100%;text-align:center">BannerCreator</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div class="arch-node green" style="font-size:11px">
+                <svg><use href="#icon-branch"/></svg>
+                Field Type Check
+              </div>
+              <div class="arch-subtitle">String → Direct · Container → Strategy</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;width:120px">
+              <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.08em;color:var(--text-disabled);text-transform:uppercase">Support</span>
+              <div class="arch-node small" style="width:100%;text-align:center">CryptoConfig</div>
+              <div class="arch-node small" style="width:100%;text-align:center">CryptoConstants</div>
+              <div class="arch-node small" style="width:100%;text-align:center">CryptoException</div>
+              <div class="arch-node small" style="width:100%;text-align:center">CryptoValidator</div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-row" style="justify-content:center">
+            <div class="arch-arrow-v">
+              <svg><use href="#icon-arrow-down"/></svg>
+            </div>
+          </div>
+
+          <!-- Row 3: Branch -->
+          <div class="arch-branch">
+            <div class="arch-branch-col">
+              <div class="arch-node green">
+                <svg><use href="#icon-code"/></svg>
+                String Field
+              </div>
+              <div class="arch-branch-label">Direct</div>
+              <div class="arch-arrow-v">
+                <svg><use href="#icon-arrow-down"/></svg>
+              </div>
+              <div class="arch-node highlight blue" style="font-size:10px;font-family:'Space Mono',monospace">
+                <svg><use href="#icon-shield"/></svg>
+                CryptoService
+              </div>
+              <div class="arch-subtitle">encrypt() / decrypt()</div>
+            </div>
+
+            <div class="arch-branch-col">
+              <div class="arch-node gold">
+                <svg><use href="#icon-layers"/></svg>
+                Container Field
+              </div>
+              <div class="arch-branch-label">List / Set / Map / Array</div>
+              <div class="arch-arrow-v">
+                <svg><use href="#icon-arrow-down"/></svg>
+              </div>
+              <div class="arch-node highlight blue" style="font-size:10px;font-family:'Space Mono',monospace">
+                <svg><use href="#icon-box"/></svg>
+                ContainerCryptoService
+              </div>
+              <div class="arch-arrow-v">
+                <svg><use href="#icon-arrow-down"/></svg>
+              </div>
+              <div class="arch-node gold" style="font-size:10px">
+                <svg><use href="#icon-settings"/></svg>
+                StrategyFactory
+              </div>
+              <div class="arch-arrow-v">
+                <svg><use href="#icon-arrow-down"/></svg>
+              </div>
+              <div class="arch-strategy-group">
+                <div class="arch-node small">List</div>
+                <div class="arch-node small">Set</div>
+                <div class="arch-node small">Map</div>
+                <div class="arch-node small">Array</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-row" style="justify-content:center">
+            <div class="arch-arrow-v">
+              <svg><use href="#icon-arrow-down"/></svg>
+            </div>
+          </div>
+
+          <!-- Bottom: CryptoUtil -->
+          <div class="arch-bottom">
+            <div class="arch-row" style="justify-content:center">
+              <div class="arch-node highlight blue" style="font-size:13px;font-family:'Space Grotesk',sans-serif">
+                <svg class="icon-md"><use href="#icon-book"/></svg>
+                CryptoUtil (Static API)
+              </div>
+            </div>
+            <div class="arch-subtitle" style="margin-top:6px">
+              AES · DES · RSA · SM2 · SM3 · SM4 · Caesar · MD5 · SHA1
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+        <div class="lightbox-content" id="lightboxContent"></div>
+      </div>
+
+      <div class="section-body mt-xl">
+        <p><strong>@Decrypt 流程：</strong>请求到达 → <span class="inline-code">CryptoAspect</span> 扫描参数中带 <span class="inline-code">@FieldDecrypt</span> 的字段 → 判断字段类型 → String 直接解密 / 容器委托 <span class="inline-code">ContainerCryptoService</span> → 策略工厂选择对应 <span class="inline-code">*CryptoStrategy</span> → 逐元素解密 → 方法执行。</p>
+        <p><strong>@Encrypt 流程：</strong>方法执行 → 扫描返回值中带 <span class="inline-code">@FieldEncrypt</span> 的字段 → 判断字段类型 → String 直接加密 / 容器委托处理 → 返回加密结果。</p>
+      </div>
+
+      <div class="section-title mt-2xl" style="font-size:18px">
+        <svg class="icon-md" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-box"/></svg>
+        类层次结构
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-box"/></svg>
+          <span>Package Structure</span>
+          <span class="code-tag"><svg class="icon-sm"><use href="#icon-flow"/></svg>Strategy · Template Method · Factory · AOP</span>
+        </div>
+        <code>com.zsq.winter.encrypt/
+├── annotation/                    ← 注解定义层
+│   ├── Encrypt.java               ─ 方法级：加密返回值
+│   ├── Decrypt.java               ─ 方法级：解密请求参数
+│   ├── FieldEncrypt.java          ─ 字段级：标记加密 + 算法参数
+│   └── FieldDecrypt.java          ─ 字段级：标记解密 + 算法参数
+│
+├── aspect/
+│   └── CryptoAspect.java          ─ 核心 AOP 编排器（@Around 拦截）
+│
+├── config/
+│   └── CryptoAutoConfiguration.java ─ Spring Boot 条件化自动配置
+│
+├── entity/
+│   ├── CryptoProperties.java      ─ @ConfigurationProperties 绑定
+│   ├── CryptoConstants.java       ─ 版本号与链接常量
+│   └── BannerCreator.java         ─ 启动 ASCII 横幅
+│
+├── enums/
+│   ├── CryptoType.java            ─ AES / DES / RSA
+│   └── CollectionStrategyType.java ─ LIST / SET / MAP / ARRAY
+│
+├── exception/
+│   └── CryptoException.java       ─ 统一运行时异常 + ErrorType
+│
+├── factory/
+│   └── ContainerCryptoStrategyFactory.java ─ 策略注册与分配
+│
+├── service/
+│   ├── CryptoService.java         ─ 加解密服务接口
+│   ├── ContainerCryptoService.java ─ 容器加解密编排
+│   └── impl/
+│       └── CryptoDefaultServiceImpl.java ─ 默认实现
+│
+├── strategy/
+│   ├── CollectionCryptoStrategy.java          ─ 策略接口
+│   ├── AbstractCollectionCryptoStrategy.java  ─ 抽象基类（模板方法）
+│   └── impl/
+│       ├── ListCryptoStrategy.java   ─ ArrayList 处理
+│       ├── SetCryptoStrategy.java    ─ HashSet 处理
+│       ├── MapCryptoStrategy.java    ─ HashMap 处理（value 加密）
+│       └── ArrayCryptoStrategy.java  ─ String[] 处理
+│
+└── util/
+    ├── CryptoUtil.java             ─ 20+ 静态加密工具方法
+    └── CryptoValidator.java       ─ 密钥/IV 长度校验与自动调整</code>
+      </div>
+
+      <div class="section-title mt-2xl" style="font-size:18px">
+        <svg class="icon-md" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-grid"/></svg>
+        设计模式应用
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>设计模式</th><th>使用位置</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-flow"/></svg>AOP（面向切面）</td><td>CryptoAspect</td><td>@Around 环绕通知，横切关注点集中处理</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-branch"/></svg>策略模式 (Strategy)</td><td>strategy/ 包</td><td>四种容器策略实现同一接口，运行时动态选择</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-layers"/></svg>模板方法 (Template Method)</td><td>AbstractCollectionCryptoStrategy</td><td>固定容器加密骨架，子类实现具体容器操作</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-settings"/></svg>工厂模式 (Factory)</td><td>ContainerCryptoStrategyFactory</td><td>策略实例注册与按类型分配</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-rocket"/></svg>自动配置 (Auto Configuration)</td><td>CryptoAutoConfiguration</td><td>@ConditionalOnProperty 条件化装配所有 Bean</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== API REFERENCE ===== -->
+    <section id="api">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-book"/></svg>
+        <div class="section-label">API 参考</div>
+      </div>
+      <div class="section-title">CryptoUtil Static API</div>
+      <div class="section-body">
+        <p><span class="inline-code">com.zsq.winter.encrypt.util.CryptoUtil</span> 提供 20+ 静态方法，涵盖密钥生成、加解密、签名验签、哈希计算。可在任何地方直接调用。</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>方法</th><th>输入</th><th>输出</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>winterGenerateKey</td><td>int size</td><td>String (Hex)</td></tr>
+          <tr><td>winterAesEncryptHex</td><td>String key, String iv, String data, Mode, Padding</td><td>String (Hex)</td></tr>
+          <tr><td>winterAesDecryptStr</td><td>String key, String iv, String hexData, Mode, Padding</td><td>String</td></tr>
+          <tr><td>winterDesEncryptHex</td><td>String key, String iv, String data, Mode, Padding</td><td>String (Hex)</td></tr>
+          <tr><td>winterDesDecryptStr</td><td>String key, String iv, String hexData, Mode, Padding</td><td>String</td></tr>
+          <tr><td>winterGenerateRsAKey</td><td>int size</td><td>KeyPair (Base64)</td></tr>
+          <tr><td>rsaEncryptToBase64</td><td>String publicKey, String data</td><td>String (Base64)</td></tr>
+          <tr><td>rsaDecryptFromBase64</td><td>String privateKey, String base64Data</td><td>String</td></tr>
+          <tr><td>winterGenerateSm2Key</td><td>—</td><td>KeyPair (Base64)</td></tr>
+          <tr><td>winterSm2EncryptToBase64</td><td>String publicKey, String data</td><td>String (Base64)</td></tr>
+          <tr><td>winterSm2DecryptFromBase64</td><td>String privateKey, String base64Data</td><td>String</td></tr>
+          <tr><td>winterSm2Sign</td><td>String privateKey, String data</td><td>String (Base64)</td></tr>
+          <tr><td>winterSm2Verify</td><td>String publicKey, String data, String sign</td><td>boolean</td></tr>
+          <tr><td>winterSm3Hex</td><td>String data</td><td>String (Hex)</td></tr>
+          <tr><td>winterGenerateSm4Key</td><td>—</td><td>String (Hex)</td></tr>
+          <tr><td>winterSm4EncryptEcbHex</td><td>String key, String data</td><td>String (Hex)</td></tr>
+          <tr><td>winterSm4DecryptEcbStr</td><td>String key, String hexData</td><td>String</td></tr>
+          <tr><td>winterSm4EncryptCbcHex</td><td>String key, String iv, String data</td><td>String (Hex)</td></tr>
+          <tr><td>winterSm4DecryptCbcStr</td><td>String key, String iv, String hexData</td><td>String</td></tr>
+          <tr><td>winterEncryptKaiser</td><td>String data, int offset</td><td>String</td></tr>
+          <tr><td>winterDecryptKaiser</td><td>String data, int offset</td><td>String</td></tr>
+          <tr><td>winterMd5Hex16</td><td>String data</td><td>String (Hex, 16 chars)</td></tr>
+          <tr><td>winterSha1Hex</td><td>String data</td><td>String (Hex, 40 chars)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===== USAGE ===== -->
+    <section id="usage">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-rocket"/></svg>
+        <div class="section-label">使用流程</div>
+      </div>
+      <div class="section-title">Getting Started</div>
+      <div class="section-body">
+        <p>三步集成，无需额外配置。从添加依赖到注解完成，全程零 Java Config。</p>
+      </div>
+
+      <div class="step-group">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">
+              <svg class="icon-md"><use href="#icon-box"/></svg>
+              添加 Maven 依赖
+            </div>
+            <div class="step-desc">在 pom.xml 中添加 winter-encrypt-spring-boot-starter 依赖。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-box"/></svg>
+          <span>pom.xml</span>
+          <span class="code-tag"><svg class="icon-sm"><use href="#icon-external"/></svg>Maven Central</span>
+        </div>
+        <code>&lt;dependency&gt;
+    &lt;groupId&gt;io.github.hahaha-zsq&lt;/groupId&gt;
+    &lt;artifactId&gt;winter-encrypt-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;0.0.32&lt;/version&gt;
+&lt;/dependency&gt;</code>
+      </div>
+
+      <div class="step-group mt-xl">
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">
+              <svg class="icon-md"><use href="#icon-settings"/></svg>
+              配置 application.yml
+            </div>
+            <div class="step-desc">设置 AES 密钥与 IV（必配）。DES 和 RSA 为可选配置。生产环境使用环境变量注入。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-settings"/></svg>
+          <span>application.yml</span>
+        </div>
+        <code>winter-crypto:
+  aes:
+    key: 346a3f9f4c1988cb7a507cc177923ac7
+    iv: 1234567887654321
+    auto-adjust-iv: true
+  rsa:
+    private-key: "${RSA_PRIVATE_KEY}"
+    public-key: "${RSA_PUBLIC_KEY}"</code>
+      </div>
+
+      <div class="step-group mt-xl">
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">
+              <svg class="icon-md"><use href="#icon-annotation"/></svg>
+              注解控制器与 VO
+            </div>
+            <div class="step-desc">在 Controller 方法上添加 @Encrypt / @Decrypt，在字段上添加 @FieldEncrypt / @FieldDecrypt。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <svg class="icon-sm"><use href="#icon-code"/></svg>
+          <span>MyController.java</span>
+        </div>
+        <code>@RestController
+@RequestMapping("/api")
+public class MyController {
+
+    @Encrypt
+    @GetMapping("/user/{id}")
+    public UserVO getUser(@PathVariable Long id) {
+        UserVO vo = userService.findById(id);
+        return vo;  // password, ssn 自动加密
+    }
+
+    @Decrypt
+    @PostMapping("/order")
+    public Result createOrder(@RequestBody OrderDTO dto) {
+        orderService.create(dto);
+        return Result.ok();
+    }
+}
+
+@Data
+public class UserVO {
+    private String username;
+
+    @FieldEncrypt(cryptoType = CryptoType.AES, mode = Mode.CBC)
+    private String password;
+
+    @FieldEncrypt(cryptoType = CryptoType.RSA)
+    private String ssn;
+
+    @FieldEncrypt(cryptoType = CryptoType.AES)
+    private List&lt;String&gt; phoneNumbers;
+}
+
+@Data
+public class OrderDTO {
+    private String orderId;
+
+    @FieldDecrypt(cryptoType = CryptoType.AES, mode = Mode.CBC)
+    private String paymentToken;
+}</code>
+      </div>
+
+      <div class="section-body mt-xl">
+        <p><strong>验证集成：</strong>启动应用，控制台将打印 Winter ASCII 横幅（<span class="inline-code">is-print: true</span> 时）。使用 POST 请求发送已加密的 JSON 到 <span class="inline-code">@Decrypt</span> 接口，验证数据是否被正确解密。</p>
+      </div>
+    </section>
+
+    <!-- ===== RELEASES ===== -->
+    <section id="releases">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-clock"/></svg>
+        <div class="section-label">版本历史</div>
+      </div>
+      <div class="section-title">Release History</div>
+      <div class="section-body">
+        <p>从 v0.0.1 到 v0.0.32 的演进历程，记录每次里程碑变更。</p>
+      </div>
+
+      <div class="release-list">
+        <div class="release-item">
+          <div class="release-version">v0.0.32</div>
+          <div class="release-desc"><strong>RSA 安全增强</strong> — 重构 RSA 加密实现，提升安全性与兼容性。修复已知边界问题。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.31</div>
+          <div class="release-desc"><strong>策略模式重构 + 容器支持</strong> — 引入策略模式重构容器处理逻辑。新增 List、Set、Map、Array 四种容器策略。新增 <span class="inline-code">AbstractCollectionCryptoStrategy</span> 模板方法基类。新增 <span class="inline-code">ContainerCryptoStrategyFactory</span> 工厂类。优化并行处理（&gt;50 元素自动并行）。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.30</div>
+          <div class="release-desc"><strong>新增解密能力</strong> — 新增 <span class="inline-code">@Decrypt</span> 和 <span class="inline-code">@FieldDecrypt</span> 注解，完美匹配 <span class="inline-code">@Encrypt</span> / <span class="inline-code">@FieldEncrypt</span> 的解密对称架构。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.29</div>
+          <div class="release-desc"><strong>SM2 签名验签</strong> — 新增 <span class="inline-code">winterSm2Sign</span> / <span class="inline-code">winterSm2Verify</span> 方法。完善国密算法支持。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.28</div>
+          <div class="release-desc"><strong>异常体系重构</strong> — 统一 <span class="inline-code">CryptoException</span> 异常体系，引入 <span class="inline-code">ErrorType</span> 枚举，细化错误分类。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.27</div>
+          <div class="release-desc"><strong>CryptoUtil 增强</strong> — 扩展工具方法集，新增 SM4 ECB/CBC 模式支持。</div>
+        </div>
+        <div class="release-item">
+          <div class="release-version">v0.0.1</div>
+          <div class="release-desc"><strong>初始版本</strong> — 首次发布。支持 <span class="inline-code">@Encrypt</span> / <span class="inline-code">@FieldEncrypt</span> 注解。集成 AES/DES/RSA 加密算法。Spring Boot 自动配置。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== NOTES ===== -->
+    <section id="notes">
+      <div class="section-header">
+        <svg class="icon-lg"><use href="#icon-alert"/></svg>
+        <div class="section-label">注意事项</div>
+      </div>
+      <div class="section-title">Important Notes</div>
+      <div class="section-body">
+        <p>使用前务必了解以下约束条件，避免在生产环境中出现问题。</p>
+      </div>
+
+      <ul class="note-list">
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-alert"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">不支持嵌套对象</span>
+            仅支持 <span class="inline-code">String</span> 类型字段和 String 元素容器。嵌套对象（如 <span class="inline-code">List&lt;UserVO&gt;</span>）不会触发加解密，抛出 <span class="inline-code">UNSUPPORTED_DATA_TYPE</span>。这是当前版本的主要功能限制。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-unlock"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">RSA 密钥格式要求</span>
+            必须使用纯 Base64 编码的 PKCS#8 私钥 / X.509 公钥。不包含 <span class="inline-code">-----BEGIN PRIVATE KEY-----</span> 等 PEM 头信息。推荐使用 <span class="inline-code">CryptoUtil.winterGenerateRsAKey()</span> 生成兼容格式的密钥。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-alert"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">RSA 加密长度限制</span>
+            RSA-1024 最大加密长度约 117 字节，RSA-2048 约 245 字节。加密大量数据时应使用混合加密方案：AES 加密数据 + RSA 加密 AES 密钥。
+          </div>
+        </li>
+        <li class="important">
+          <div class="note-bullet"><svg><use href="#icon-alert"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">空值会抛出异常</span>
+            标注了 <span class="inline-code">@FieldEncrypt</span> / <span class="inline-code">@FieldDecrypt</span> 的字段如果为 <span class="inline-code">null</span>，将抛出 <span class="inline-code">CryptoException(EMPTY_DATA)</span>。请确保所有敏感字段在前置处理中已被正确赋值。空字符串 <span class="inline-code">""</span> 可以正常处理。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-layers"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">容器类型限制</span>
+            仅支持 String 元素类型的容器（<span class="inline-code">List&lt;String&gt;</span> / <span class="inline-code">Set&lt;String&gt;</span> / <span class="inline-code">Map&lt;String,String&gt;</span> / <span class="inline-code">String[]</span>）。Map 仅加密 value，key 保持明文。数组加解密后元素类型为 <span class="inline-code">String[]</span>。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-settings"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">密钥长度严格校验</span>
+            AES 密钥：16/24/32 字节（128/192/256 位）。AES IV：16 字节。DES 密钥：8 字节。DES IV：8 字节。开启 <span class="inline-code">auto-adjust-iv: true</span>（默认开启）可自动修正 IV 长度，关闭则严格校验。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-rocket"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">条件化自动配置</span>
+            必须同时配置 <span class="inline-code">winter-crypto.aes.key</span> 和 <span class="inline-code">winter-crypto.aes.iv</span>，否则整个自动配置被跳过，所有加解密注解不生效。启动时注意控制台是否有 Winter 横幅输出。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-shield"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">生产环境密钥管理</span>
+            <strong>严禁</strong>将密钥硬编码在 YAML 文件中提交到版本控制。推荐使用环境变量注入（如 <span class="inline-code">${AES_KEY}</span>）、Vault 或 AWS KMS 等密钥管理服务。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-cpu"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">线程安全</span>
+            <span class="inline-code">CryptoAspect</span> 中的服务 Bean 在初始化后不可变，对多线程请求是安全的。但请注意 <span class="inline-code">BouncyCastleProvider</span> 在 <span class="inline-code">CryptoUtil</span> 中每次调用都重新注册，建议后续优化为静态初始化。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-alert"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">版本号不一致</span>
+            源代码中 <span class="inline-code">CryptoConstants.VERSION_NO</span> 硬编码为 <span class="inline-code">v0.0.1</span>，与 POM 版本 0.0.32 不一致。引用了此常量的场景（如 Banner 输出）可能显示过期版本号。
+          </div>
+        </li>
+        <li>
+          <div class="note-bullet"><svg><use href="#icon-box"/></svg></div>
+          <div class="note-body">
+            <span class="note-label">无自定义加密扩展</span>
+            加密实现固定为内置算法。当前版本不支持用户注入自定义加密算法或替换默认实现。
+          </div>
+        </li>
+      </ul>
+
+      <div class="section-body mt-xl">
+        <p><strong>最佳实践总结：</strong></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th><svg class="icon-sm" style="margin-right:4px;vertical-align:middle"><use href="#icon-check"/></svg>实践</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-lock"/></svg>AES 优先</td><td>大多数场景使用 AES-CBC 或 AES-GCM（如需认证加密）</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-unlock"/></svg>RSA 仅限小数据</td><td>RSA 用于密钥交换或小字段加密（如 SSN、Token）</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-shield"/></svg>环境变量注入</td><td>使用 ${VAR} 语法，不要在 YAML 中明文写密钥</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-check"/></svg>非空保证</td><td>确保 @FieldEncrypt / @FieldDecrypt 字段不为 null</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-shield"/></svg>国密合规</td><td>面向中国政务/金融场景，使用 SM2 + SM4 组合</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-clock"/></svg>定期轮换密钥</td><td>建议定期更新 AES/RSA 密钥，降低泄露风险</td></tr>
+          <tr><td><svg class="icon-sm" style="margin-right:6px;vertical-align:middle;color:var(--text-disabled)"><use href="#icon-box"/></svg>避免嵌套对象</td><td>VO/DTO 设计时保持浅平结构，仅含 String / 容器字段</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-text">
+      Winter-Encrypt v0.0.32 &mdash; Apache 2.0 License
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank">
+        <svg class="icon-md"><use href="#icon-github"/></svg>GitHub
+      </a>
+      <a href="https://central.sonatype.com/artifact/io.github.hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank">
+        <svg class="icon-md"><use href="#icon-box"/></svg>Maven Central
+      </a>
+      <a href="https://mvnrepository.com/artifact/io.github.hahaha-zsq/winter-encrypt-spring-boot-starter" target="_blank">
+        <svg class="icon-md"><use href="#icon-external"/></svg>MVNRepository
+      </a>
+    </div>
+  </div>
+</footer>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-input-wrap">
+    <svg class="icon-md search-icon"><use href="#icon-code"/></svg>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search documentation..." autocomplete="off">
+    <span class="search-shortcut">ESC</span>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<script>
+(function() {
+  var diagram = document.querySelector('.arch-diagram');
+  var lightbox = document.getElementById('lightbox');
+  var lightboxContent = document.getElementById('lightboxContent');
+  var lightboxClose = document.getElementById('lightboxClose');
+
+  if (diagram && lightbox) {
+    diagram.addEventListener('click', function(e) {
+      if (e.target.closest('a')) return;
+      var clone = this.cloneNode(true);
+      clone.style.margin = '0';
+      lightboxContent.innerHTML = '';
+      lightboxContent.appendChild(clone);
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+  if (lightbox) lightbox.addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+  });
+})();
+
+(function() {
+  var overlay = document.getElementById('searchOverlay');
+  var input = document.getElementById('searchInput');
+  var results = document.getElementById('searchResults');
+  if (!overlay || !input || !results) return;
+
+  var sections = [];
+  document.querySelectorAll('section[id]').forEach(function(section) {
+    var titleEl = section.querySelector('.section-title');
+    var labelEl = section.querySelector('.section-label');
+    var descEl = section.querySelector('.section-body p');
+    if (titleEl) {
+      sections.push({
+        id: section.id,
+        title: titleEl.textContent.trim(),
+        label: labelEl ? labelEl.textContent.trim() : '',
+        desc: descEl ? descEl.textContent.trim().substring(0, 120) : ''
+      });
+    }
+  });
+
+  function openSearch() {
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function() { input.focus(); }, 100);
+  }
+
+  function closeSearch() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    input.value = '';
+    results.innerHTML = '';
+  }
+
+  function performSearch(query) {
+    if (!query.trim()) { results.innerHTML = ''; return; }
+    var q = query.toLowerCase();
+    var filtered = sections.filter(function(s) {
+      return s.title.toLowerCase().includes(q) ||
+             s.label.toLowerCase().includes(q) ||
+             s.desc.toLowerCase().includes(q);
+    });
+
+    if (filtered.length === 0) {
+      results.innerHTML = '<div class="search-empty">No matching results found</div>';
+      return;
+    }
+
+    var html = '';
+    filtered.forEach(function(s) {
+      html += '<a href="#' + s.id + '" class="search-result-item">' +
+        '<svg><use href="#icon-arrow-right"/></svg>' +
+        '<div><div class="search-result-title">' + s.title + '</div>' +
+        (s.desc ? '<div class="search-result-desc">' + s.desc + '</div>' : '') +
+        '</div></a>';
+    });
+    results.innerHTML = html;
+
+    results.querySelectorAll('.search-result-item').forEach(function(item) {
+      item.addEventListener('click', function() { closeSearch(); });
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      closeSearch();
+    }
+  });
+
+  input.addEventListener('input', function() { performSearch(this.value); });
+  input.addEventListener('keydown', function(e) {
+    var items = results.querySelectorAll('.search-result-item');
+    if (e.key === 'Enter') {
+      var selected = results.querySelector('.search-result-item.selected');
+      if (selected) { selected.click(); return; }
+      if (items.length) items[0].click();
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var currentIdx = Array.prototype.indexOf.call(items, results.querySelector('.selected'));
+      var nextIdx;
+      if (e.key === 'ArrowDown') {
+        nextIdx = currentIdx < items.length - 1 ? currentIdx + 1 : 0;
+      } else {
+        nextIdx = currentIdx > 0 ? currentIdx - 1 : items.length - 1;
+      }
+      [].forEach.call(items, function(el) { el.classList.remove('selected'); });
+      if (items[nextIdx]) items[nextIdx].classList.add('selected');
+    }
+  });
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeSearch();
+  });
+})();
+
+(function() {
+  var nav = document.querySelector('nav ul');
+  if (!nav) return;
+  var startX, scrollLeft;
+  nav.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].pageX;
+    scrollLeft = this.scrollLeft;
+  }, { passive: true });
+  nav.addEventListener('touchmove', function(e) {
+    var x = e.touches[0].pageX;
+    this.scrollLeft = scrollLeft + (startX - x) * 1.5;
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
